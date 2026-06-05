@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class BookResponseDTO {
     private Long id;
     private String title;
+    private String author;
     private String description;
     private String thumbnailPath;
     private BookStatus status;

@@ -44,13 +44,13 @@ public class BookService {
     private final VirusScanService virusScanService;
     private final org.personal.library.dao.CategoryRepository categoryRepository;
     private final org.personal.library.dao.TagRepository tagRepository;
-    private final org.personal.library.dao.AuthorRepository authorRepository;
     private final org.personal.library.dao.SeriesRepository seriesRepository;
+    private final org.personal.library.dao.BookViewRepository bookViewRepository;
     private final org.personal.library.config.AppProperties appProperties;
 
     @Transactional
     public void uploadBook(String title, String description, MultipartFile pdfFile, MultipartFile thumbnailFile,
-                           List<Long> categoryIds, List<Long> tagIds, List<Long> authorIds, Long seriesId) {
+                           List<Long> categoryIds, List<Long> tagIds, String author, Long seriesId) {
         String username = SecurityUtils.getCurrentUsername();
         if (username == null) {
             throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
@@ -105,8 +105,8 @@ public class BookService {
             if (tagIds != null && !tagIds.isEmpty()) {
                 book.setTags(new java.util.HashSet<>(tagRepository.findAllById(tagIds)));
             }
-            if (authorIds != null && !authorIds.isEmpty()) {
-                book.setAuthors(new java.util.HashSet<>(authorRepository.findAllById(authorIds)));
+            if (author != null && !author.isBlank()) {
+                book.setAuthor(author);
             }
             if (seriesId != null) {
                 book.setSeries(seriesRepository.findById(seriesId).orElse(null));
@@ -237,10 +237,22 @@ public class BookService {
 
     @Transactional
     public void incrementViews(Long bookId) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null || username.equals("anonymousUser")) {
+            return; // Ignore unauthenticated views or handle differently
+        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
-        book.setViews(book.getViews() + 1);
-        bookRepository.save(book);
+
+        if (!bookViewRepository.existsByUserIdAndBookId(user.getId(), book.getId())) {
+            org.personal.library.model.BookView view = new org.personal.library.model.BookView(user, book);
+            bookViewRepository.save(view);
+            book.setViews(book.getViews() + 1);
+            bookRepository.save(book);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -262,6 +274,7 @@ public class BookService {
         return org.personal.library.dto.book.BookResponseDTO.builder()
                 .id(book.getId())
                 .title(book.getTitle())
+                .author(book.getAuthor())
                 .description(book.getDescription())
                 .thumbnailPath(book.getThumbnailPath())
                 .status(book.getStatus())

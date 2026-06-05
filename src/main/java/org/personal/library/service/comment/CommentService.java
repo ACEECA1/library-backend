@@ -9,7 +9,9 @@ import org.personal.library.dto.comment.CommentResponseDTO;
 import org.personal.library.dto.common.PaginatedResponse;
 import org.personal.library.model.Book;
 import org.personal.library.model.Comment;
+import org.personal.library.model.CommentVote;
 import org.personal.library.model.User;
+import org.personal.library.dao.CommentVoteRepository;
 import org.personal.library.util.AppException;
 import org.personal.library.util.SecurityUtils;
 import org.springframework.data.domain.Page;
@@ -27,6 +29,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final CommentVoteRepository commentVoteRepository;
     private final org.personal.library.service.audit.AuditLogService auditLogService;
     private final org.personal.library.service.notification.NotificationService notificationService;
 
@@ -108,17 +111,49 @@ public class CommentService {
 
     @Transactional
     public void upvoteComment(Long commentId) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) throw new AppException("Unauthorized", HttpStatus.UNAUTHORIZED);
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AppException("Comment not found", HttpStatus.NOT_FOUND));
-        comment.setUpvotes(comment.getUpvotes() + 1);
+
+        CommentVote vote = commentVoteRepository.findByUserIdAndCommentId(user.getId(), comment.getId()).orElse(null);
+        if (vote != null) {
+            if (vote.getVoteType() == CommentVote.VoteType.UP) return; // already upvoted
+            // changing from DOWN to UP
+            vote.setVoteType(CommentVote.VoteType.UP);
+            comment.setDownvotes(comment.getDownvotes() - 1);
+            comment.setUpvotes(comment.getUpvotes() + 1);
+        } else {
+            vote = new CommentVote(user, comment, CommentVote.VoteType.UP);
+            comment.setUpvotes(comment.getUpvotes() + 1);
+        }
+        commentVoteRepository.save(vote);
         commentRepository.save(comment);
     }
 
     @Transactional
     public void downvoteComment(Long commentId) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) throw new AppException("Unauthorized", HttpStatus.UNAUTHORIZED);
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AppException("Comment not found", HttpStatus.NOT_FOUND));
-        comment.setDownvotes(comment.getDownvotes() + 1);
+
+        CommentVote vote = commentVoteRepository.findByUserIdAndCommentId(user.getId(), comment.getId()).orElse(null);
+        if (vote != null) {
+            if (vote.getVoteType() == CommentVote.VoteType.DOWN) return; // already downvoted
+            // changing from UP to DOWN
+            vote.setVoteType(CommentVote.VoteType.DOWN);
+            comment.setUpvotes(comment.getUpvotes() - 1);
+            comment.setDownvotes(comment.getDownvotes() + 1);
+        } else {
+            vote = new CommentVote(user, comment, CommentVote.VoteType.DOWN);
+            comment.setDownvotes(comment.getDownvotes() + 1);
+        }
+        commentVoteRepository.save(vote);
         commentRepository.save(comment);
     }
 

@@ -42,3 +42,4 @@ storage/
 postman/
 .postman/
 resolve_deps.ps1
+postman/.dependencies/

@@ -88,13 +88,9 @@ public class Book extends BaseEntity {
     )
     private Set<Tag> tags = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(
-            name = "book_authors",
-            joinColumns = @JoinColumn(name = "book_id"),
-            inverseJoinColumns = @JoinColumn(name = "author_id")
-    )
-    private Set<Author> authors = new HashSet<>();
+    @Column
+    @FullTextField
+    private String author;
 
     public enum BookStatus {
         PENDING, LIVE
