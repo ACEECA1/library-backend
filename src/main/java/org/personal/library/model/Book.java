@@ -27,8 +27,7 @@ public class Book extends BaseEntity {
     @FullTextField
     private String description;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Transient
     @FullTextField
     private String content;
 
