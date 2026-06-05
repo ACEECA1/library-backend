@@ -29,6 +29,7 @@ public class AppProperties {
 
     @Data
     public static class VirusScan {
+        private boolean enabled = true;
         private String host = "localhost";
         private int port = 3310;
     }

@@ -21,6 +21,11 @@ public class VirusScanService {
     private final org.personal.library.config.AppProperties appProperties;
 
     public void scanPdf(Path pdfPath) {
+        if (!appProperties.getVirusScan().isEnabled()) {
+            log.info("Virus scan is disabled. Skipping scan for: {}", pdfPath);
+            return;
+        }
+
         if (pdfPath == null) {
             throw new AppException("Virus scan failed: missing PDF path", HttpStatus.INTERNAL_SERVER_ERROR);
         }
