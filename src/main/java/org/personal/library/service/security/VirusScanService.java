@@ -7,16 +7,18 @@ import org.springframework.stereotype.Service;
 import xyz.capybara.clamav.ClamavClient;
 import xyz.capybara.clamav.commands.scan.result.ScanResult;
 
+import java.io.InputStream;
 import java.nio.file.Path;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class VirusScanService {
 
-    @Value("${app.virus.scan.host:localhost}")
-    private String clamavHost;
-
-    @Value("${app.virus.scan.port:3310}")
-    private int clamavPort;
+    private final org.personal.library.config.AppProperties appProperties;
 
     public void scanPdf(Path pdfPath) {
         if (pdfPath == null) {
@@ -24,7 +26,7 @@ public class VirusScanService {
         }
 
         try {
-            ClamavClient client = new ClamavClient(clamavHost, clamavPort);
+            ClamavClient client = new ClamavClient(appProperties.getVirusScan().getHost(), appProperties.getVirusScan().getPort());
             ScanResult result = client.scan(pdfPath);
             if (result instanceof ScanResult.VirusFound) {
                 ScanResult.VirusFound virusFound = (ScanResult.VirusFound) result;

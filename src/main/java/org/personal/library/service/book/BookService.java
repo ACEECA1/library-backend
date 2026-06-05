@@ -45,12 +45,7 @@ public class BookService {
     private final org.personal.library.dao.TagRepository tagRepository;
     private final org.personal.library.dao.AuthorRepository authorRepository;
     private final org.personal.library.dao.SeriesRepository seriesRepository;
-
-    @Value("${app.storage.books:storage/books}")
-    private String booksStoragePath;
-
-    @Value("${app.storage.thumbnails:storage/thumbnails}")
-    private String thumbnailsStoragePath;
+    private final org.personal.library.config.AppProperties appProperties;
 
     @Transactional
     public void uploadBook(String title, String description, MultipartFile pdfFile, MultipartFile thumbnailFile,
@@ -68,8 +63,8 @@ public class BookService {
         Path thumbnailPath = null;
 
         try {
-            Path booksPath = Paths.get(booksStoragePath);
-            Path thumbnailsPath = Paths.get(thumbnailsStoragePath);
+            Path booksPath = Paths.get(appProperties.getStorage().getBooks());
+            Path thumbnailsPath = Paths.get(appProperties.getStorage().getThumbnails());
 
             // Ensure directories exist
             Files.createDirectories(booksPath);

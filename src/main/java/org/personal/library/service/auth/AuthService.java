@@ -5,7 +5,6 @@ import org.personal.library.dao.UserRepository;
 import org.personal.library.dto.auth.LoginDTO;
 import org.personal.library.dto.auth.UserRegistrationDTO;
 import org.personal.library.dto.auth.UserResponseDTO;
-import org.personal.library.model.Permission;
 import org.personal.library.model.Role;
 import org.personal.library.model.User;
 import org.personal.library.service.notification.NotificationService;
