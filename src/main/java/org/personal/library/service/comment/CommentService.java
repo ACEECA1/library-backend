@@ -72,6 +72,40 @@ public class CommentService {
         return PaginatedResponse.from(page);
     }
 
+    @Transactional(readOnly = true)
+    public java.util.List<CommentResponseDTO> getUserDraftsForBook(Long bookId) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) {
+            throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+        return commentRepository.findByBookIdAndUserIdAndIsDraftTrue(bookId, user.getId())
+                .stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateComment(Long commentId, CommentRequestDTO dto) {
+        String username = SecurityUtils.getCurrentUsername();
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new AppException("Comment not found", HttpStatus.NOT_FOUND));
+        if (!comment.getUser().getUsername().equals(username)) {
+            throw new AppException("You do not have permission to update this comment", HttpStatus.FORBIDDEN);
+        }
+        comment.setText(dto.getText());
+        boolean wasDraft = comment.isDraft();
+        comment.setDraft(dto.isDraft());
+        commentRepository.save(comment);
+
+        if (wasDraft && !comment.isDraft()) {
+            auditLogService.logAction("PUBLISH_COMMENT", "Published draft comment ID: " + commentId);
+            Book book = comment.getBook();
+            if (!comment.getUser().getId().equals(book.getUploader().getId()) && book.getUploader() != null) {
+                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle());
+            }
+        }
+    }
+
     @Transactional
     public void upvoteComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId)

@@ -32,6 +32,17 @@ public class CommentController {
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(commentService.getCommentsForBook(bookId, pageable)));
     }
+
+    @GetMapping("/drafts")
+    public ResponseEntity<ApiResponse<java.util.List<CommentResponseDTO>>> getUserDrafts(@PathVariable Long bookId) {
+        return ResponseEntity.ok(ApiResponse.success(commentService.getUserDraftsForBook(bookId)));
+    }
+
+    @PutMapping("/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> updateComment(@PathVariable Long bookId, @PathVariable Long commentId, @Valid @RequestBody CommentRequestDTO requestDTO) {
+        commentService.updateComment(commentId, requestDTO);
+        return ResponseEntity.ok(ApiResponse.success(null, "Comment updated successfully"));
+    }
     @DeleteMapping("/{commentId}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable Long bookId, @PathVariable Long commentId) {
         commentService.deleteComment(commentId);
