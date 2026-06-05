@@ -22,10 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.security.core.session.SessionInformation;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.userdetails.UserDetails;
-
 @Service
 @RequiredArgsConstructor
 public class RoleManagementService {
@@ -34,7 +30,6 @@ public class RoleManagementService {
     private final PermissionRepository permissionRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
-    private final SessionRegistry sessionRegistry;
 
     @Transactional
     public RoleResponseDTO createRole(RoleCreateRequestDTO dto) {
@@ -105,15 +100,8 @@ public class RoleManagementService {
     }
 
     private void invalidateUserSessions(String username) {
-        for (Object principal : sessionRegistry.getAllPrincipals()) {
-            if (principal instanceof UserDetails userDetails) {
-                if (userDetails.getUsername().equals(username)) {
-                    for (SessionInformation session : sessionRegistry.getAllSessions(principal, false)) {
-                        session.expireNow();
-                    }
-                }
-            }
-        }
+        // With stateless JWTs, role changes take effect upon token refresh or next login.
+        // Or if token revocation is added later, invalidate refresh tokens here.
     }
 
     private RoleResponseDTO mapToDTO(Role role) {
