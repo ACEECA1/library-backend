@@ -40,4 +40,9 @@ public class RabbitMQConfig {
     public Binding badgeBinding(Queue badgeQueue, DirectExchange exchange) {
         return BindingBuilder.bind(badgeQueue).to(exchange).with(BADGE_ROUTING_KEY);
     }
+
+    @Bean
+    public org.springframework.amqp.support.converter.MessageConverter jsonMessageConverter() {
+        return new org.springframework.amqp.support.converter.Jackson2JsonMessageConverter();
+    }
 }

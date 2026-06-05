@@ -18,5 +18,6 @@ public class CommentResponseDTO {
     private Long parentCommentId;
     private LocalDateTime createdAt;
     private boolean isDraft;
+    private List<String> badges;
     private List<CommentResponseDTO> replies;
 }

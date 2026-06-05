@@ -49,6 +49,9 @@ public class BookController {
             Resource resource = new UrlResource(filePath.toUri());
 
             if (resource.exists() || resource.isReadable()) {
+
+                bookService.incrementViews(id);
+                
                 return ResponseEntity.ok()
                         .contentType(MediaType.APPLICATION_PDF)
                         .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + resource.getFilename() + "\"")
@@ -96,11 +99,7 @@ public class BookController {
         return ResponseEntity.ok(ApiResponse.success(null, "Book approved successfully"));
     }
 
-    @PostMapping("/{id}/view")
-    public ResponseEntity<ApiResponse<Void>> incrementView(@PathVariable Long id) {
-        bookService.incrementViews(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "View incremented"));
-    }
+
 
     @GetMapping("/{id}/related")
     public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> getRelatedBooks(

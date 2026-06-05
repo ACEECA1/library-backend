@@ -122,16 +122,22 @@ public class CommentService {
 
         CommentVote vote = commentVoteRepository.findByUserIdAndCommentId(user.getId(), comment.getId()).orElse(null);
         if (vote != null) {
-            if (vote.getVoteType() == CommentVote.VoteType.UP) return; // already upvoted
+            if (vote.getVoteType() == CommentVote.VoteType.UP) {
+                commentVoteRepository.delete(vote);
+                comment.setUpvotes(comment.getUpvotes() - 1);
+                commentRepository.save(comment);
+                return;
+            }
             // changing from DOWN to UP
             vote.setVoteType(CommentVote.VoteType.UP);
             comment.setDownvotes(comment.getDownvotes() - 1);
             comment.setUpvotes(comment.getUpvotes() + 1);
+            commentVoteRepository.save(vote);
         } else {
             vote = new CommentVote(user, comment, CommentVote.VoteType.UP);
             comment.setUpvotes(comment.getUpvotes() + 1);
+            commentVoteRepository.save(vote);
         }
-        commentVoteRepository.save(vote);
         commentRepository.save(comment);
 
         badgeProducer.publishEvent("UPVOTE", comment.getUser().getId());
@@ -148,16 +154,22 @@ public class CommentService {
 
         CommentVote vote = commentVoteRepository.findByUserIdAndCommentId(user.getId(), comment.getId()).orElse(null);
         if (vote != null) {
-            if (vote.getVoteType() == CommentVote.VoteType.DOWN) return; // already downvoted
+            if (vote.getVoteType() == CommentVote.VoteType.DOWN) {
+                commentVoteRepository.delete(vote);
+                comment.setDownvotes(comment.getDownvotes() - 1);
+                commentRepository.save(comment);
+                return;
+            }
             // changing from UP to DOWN
             vote.setVoteType(CommentVote.VoteType.DOWN);
             comment.setUpvotes(comment.getUpvotes() - 1);
             comment.setDownvotes(comment.getDownvotes() + 1);
+            commentVoteRepository.save(vote);
         } else {
             vote = new CommentVote(user, comment, CommentVote.VoteType.DOWN);
             comment.setDownvotes(comment.getDownvotes() + 1);
+            commentVoteRepository.save(vote);
         }
-        commentVoteRepository.save(vote);
         commentRepository.save(comment);
     }
 
@@ -172,6 +184,9 @@ public class CommentService {
                 .bookId(comment.getBook().getId())
                 .parentCommentId(comment.getParentComment() != null ? comment.getParentComment().getId() : null)
                 .isDraft(comment.isDraft())
+                .badges(comment.getUser().getBadges().stream()
+                        .map(b -> b.getBadgeType().name())
+                        .collect(Collectors.toList()))
                 .replies(comment.getReplies().stream().filter(c -> !c.isDraft()).map(this::mapToDTO).collect(Collectors.toList()))
                 .build();
     }

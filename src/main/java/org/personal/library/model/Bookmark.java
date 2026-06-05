@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookmarks", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "book_id", "page_number"})
+        @UniqueConstraint(columnNames = {"user_id", "book_id"})
 })
 @Getter
 @Setter
@@ -27,10 +27,7 @@ public class Bookmark {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    // If null, it's a general bookmark for the book (e.g. "read later").
-    // If not null, it's a bookmark for a specific page.
-    @Column(name = "page_number")
-    private Integer pageNumber;
+    // General bookmark for the book (e.g. "read later").
 
     @Column(length = 255)
     private String note;

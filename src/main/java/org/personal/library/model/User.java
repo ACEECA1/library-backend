@@ -41,6 +41,9 @@ public class User extends BaseEntity {
     )
     private Set<Role> roles = new HashSet<>();
     
+    @OneToMany(mappedBy = "user")
+    private Set<UserBadge> badges = new HashSet<>();
+    
     public enum UserStatus {
         PENDING, ACTIVE, BANNED
     }

@@ -35,15 +35,12 @@ public class BookmarkService {
         Book book = bookRepository.findById(dto.getBookId())
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
 
-        if (dto.getPageNumber() != null) {
-            bookmarkRepository.findByUserIdAndBookIdAndPageNumber(user.getId(), book.getId(), dto.getPageNumber())
-                    .ifPresent(b -> { throw new AppException("Bookmark already exists for this page", HttpStatus.BAD_REQUEST); });
-        }
+        bookmarkRepository.findByUserIdAndBookId(user.getId(), book.getId())
+                .ifPresent(b -> { throw new AppException("Book is already bookmarked", HttpStatus.BAD_REQUEST); });
 
         Bookmark bookmark = new Bookmark();
         bookmark.setUser(user);
         bookmark.setBook(book);
-        bookmark.setPageNumber(dto.getPageNumber());
         bookmark.setNote(dto.getNote());
         
         bookmarkRepository.save(bookmark);
@@ -59,7 +56,6 @@ public class BookmarkService {
                         .id(b.getId())
                         .bookId(b.getBook().getId())
                         .bookTitle(b.getBook().getTitle())
-                        .pageNumber(b.getPageNumber())
                         .note(b.getNote())
                         .createdAt(b.getCreatedAt())
                         .build());

@@ -11,7 +11,6 @@ public class BookmarkResponseDTO {
     private Long id;
     private Long bookId;
     private String bookTitle;
-    private Integer pageNumber;
     private String note;
     private LocalDateTime createdAt;
 }
