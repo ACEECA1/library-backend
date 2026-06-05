@@ -1,0 +1,95 @@
+package org.personal.library.config;
+
+import lombok.RequiredArgsConstructor;
+import org.personal.library.dao.PermissionRepository;
+import org.personal.library.dao.RoleRepository;
+import org.personal.library.dao.UserRepository;
+import org.personal.library.model.Permission;
+import org.personal.library.model.Role;
+import org.personal.library.model.User;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@Component
+@RequiredArgsConstructor
+public class DataSeeder implements CommandLineRunner {
+
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PermissionRepository permissionRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    @Override
+    @Transactional
+    public void run(String... args) {
+        if (userRepository.count() == 0) {
+            seedPermissionsAndRoles();
+            seedAdminUser();
+        }
+    }
+
+    private void seedPermissionsAndRoles() {
+        List<String> permissionNames = Arrays.asList(
+                "UPLOAD_BOOK", "APPROVE_BOOK", "MODERATE_COMMENTS", "BAN_USER", "USER_APPROVAL"
+        );
+
+        Set<Permission> allPermissions = new HashSet<>();
+        for (String pName : permissionNames) {
+            Permission permission = permissionRepository.findByName(pName).orElseGet(() -> {
+                Permission p = new Permission();
+                p.setName(pName);
+                return permissionRepository.save(p);
+            });
+            allPermissions.add(permission);
+        }
+
+        Role adminRole = roleRepository.findByName("ADMIN").orElseGet(() -> {
+            Role r = new Role();
+            r.setName("ADMIN");
+            return r;
+        });
+        adminRole.setPermissions(allPermissions);
+        roleRepository.save(adminRole);
+
+        Role moderatorRole = roleRepository.findByName("MODERATOR").orElseGet(() -> {
+            Role r = new Role();
+            r.setName("MODERATOR");
+            return r;
+        });
+        
+        Set<Permission> modPermissions = new HashSet<>();
+        for (Permission p : allPermissions) {
+            if (p.getName().equals("MODERATE_COMMENTS") || 
+                p.getName().equals("BAN_USER") || 
+                p.getName().equals("USER_APPROVAL")) {
+                modPermissions.add(p);
+            }
+        }
+        moderatorRole.setPermissions(modPermissions);
+        roleRepository.save(moderatorRole);
+    }
+
+    private void seedAdminUser() {
+        Role adminRole = roleRepository.findByName("ADMIN").orElseThrow();
+
+        User admin = new User();
+        admin.setUsername("admin");
+        admin.setPassword(passwordEncoder.encode("admin123"));
+        admin.setFirstName("System");
+        admin.setLastName("Administrator");
+        admin.setStatus(User.UserStatus.ACTIVE);
+        
+        Set<Role> roles = new HashSet<>();
+        roles.add(adminRole);
+        admin.setRoles(roles);
+
+        userRepository.save(admin);
+    }
+}
