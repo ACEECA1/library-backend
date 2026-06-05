@@ -21,7 +21,7 @@ import java.util.Set;
 public class Permission extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, columnDefinition = "VARCHAR(255)")
     private PermissionType name;
 
     @ManyToMany(mappedBy = "permissions")
