@@ -61,6 +61,11 @@ public class BookController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<org.personal.library.dto.book.BookResponseDTO>> getBook(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(bookService.getBook(id)));
+    }
+
     @GetMapping
     public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> getAllLiveBooks(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {

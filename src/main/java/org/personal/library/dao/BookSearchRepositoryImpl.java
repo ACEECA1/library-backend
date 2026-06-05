@@ -21,15 +21,22 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
 
     @Override
     public Page<Book> searchBooks(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new PageImpl<>(java.util.Collections.emptyList(), pageable, 0);
+        }
+
         SearchSession searchSession = Search.session(entityManager);
         int offset = (int) pageable.getOffset();
         int limit = pageable.getPageSize();
 
         SearchResult<Book> result = searchSession.search(Book.class)
-                .where(f -> f.match()
-                        .fields("title", "description", "content")
-                        .matching(keyword)
-                        .fuzzy())
+                .where(f -> f.bool()
+                        .must(f.match()
+                                .fields("title", "description", "content")
+                                .matching(keyword)
+                                .fuzzy())
+                        .filter(f.match().field("status").matching(Book.BookStatus.LIVE))
+                )
                 .fetch(offset, limit);
 
         return new PageImpl<>(result.hits(), pageable, result.total().hitCount());

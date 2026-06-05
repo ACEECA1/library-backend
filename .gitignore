@@ -35,3 +35,10 @@ build/
 ### Environments ###
 .env
 .env.*
+
+### Custom ###
+storage/
+.mvn/
+postman/
+.postman/
+resolve_deps.ps1

@@ -796,7 +796,7 @@
               "mode": "formdata",
               "formdata": [
                 {
-                  "key": "file",
+                  "key": "pdfFile",
                   "type": "file",
                   "src": []
                 },
@@ -809,21 +809,42 @@
                   "key": "description",
                   "value": "An advanced guide to algorithms.",
                   "type": "text"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Live Books (Paginated)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/books?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "books"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
                 },
                 {
-                  "key": "isbn",
-                  "value": "123-456-789",
-                  "type": "text"
-                },
-                {
-                  "key": "publisher",
-                  "value": "Tech Press",
-                  "type": "text"
-                },
-                {
-                  "key": "publicationYear",
-                  "value": "2024",
-                  "type": "text"
+                  "key": "size",
+                  "value": "20"
                 }
               ]
             }
@@ -844,17 +865,18 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/books?search=Algorithms&page=0&size=10",
+              "raw": "{{baseUrl}}/api/books/search?q=Algorithms&page=0&size=10",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
-                "books"
+                "books",
+                "search"
               ],
               "query": [
                 {
-                  "key": "search",
+                  "key": "q",
                   "value": "Algorithms"
                 },
                 {
@@ -897,7 +919,7 @@
           }
         },
         {
-          "name": "Download Book PDF",
+          "name": "Stream Book PDF",
           "request": {
             "auth": {
               "type": "bearer",
@@ -911,7 +933,7 @@
             },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/books/1/download",
+              "raw": "{{baseUrl}}/api/books/1/stream",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -919,71 +941,7 @@
                 "api",
                 "books",
                 "1",
-                "download"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Update Book Details",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{accessToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/books/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "books",
-                "1"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Updated Algorithms\",\n  \"description\": \"Updated description\"\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete Book",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{accessToken}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "url": {
-              "raw": "{{baseUrl}}/api/books/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "books",
-                "1"
+                "stream"
               ]
             }
           }

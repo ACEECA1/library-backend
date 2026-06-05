@@ -34,6 +34,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class BookService {
 
     private final BookRepository bookRepository;
@@ -89,9 +90,6 @@ public class BookService {
                 thumbnailFileName = UUID.randomUUID() + extension;
                 thumbnailPath = thumbnailsPath.resolve(thumbnailFileName);
                 Files.copy(thumbnailFile.getInputStream(), thumbnailPath, StandardCopyOption.REPLACE_EXISTING);
-            } else {
-                thumbnailFileName = generateThumbnailFromPdf(pdfPath, thumbnailsPath);
-                thumbnailPath = thumbnailsPath.resolve(thumbnailFileName);
             }
 
             Book book = new Book();
@@ -100,15 +98,6 @@ public class BookService {
             book.setPdfFilePath(pdfPath.toString());
             book.setThumbnailPath(thumbnailFileName != null ? thumbnailPath.toString() : null);
             book.setUploader(uploader);
-
-            try (PDDocument document = Loader.loadPDF(pdfPath.toFile())) {
-                org.apache.pdfbox.text.PDFTextStripper stripper = new org.apache.pdfbox.text.PDFTextStripper();
-                String content = stripper.getText(document);
-                book.setContent(content);
-            } catch (IOException e) {
-                // If text extraction fails, we still save the book but without content text
-                book.setContent("");
-            }
 
             if (categoryIds != null && !categoryIds.isEmpty()) {
                 book.setCategories(new java.util.HashSet<>(categoryRepository.findAllById(categoryIds)));
@@ -142,6 +131,41 @@ public class BookService {
                 notificationService.notifyAdmins("Book upload pending approval: " + book.getTitle());
             }
 
+            final Path finalPdfPath = pdfPath;
+            final Path finalThumbnailsPath = thumbnailsPath;
+            final boolean generateThumb = (thumbnailFile == null || thumbnailFile.isEmpty());
+
+            java.util.concurrent.CompletableFuture.runAsync(() -> {
+                log.info("Starting background processing (thumbnail and text extraction) for Book ID: {}", book.getId());
+                try {
+                    // Extract text
+                    try (PDDocument document = Loader.loadPDF(finalPdfPath.toFile())) {
+                        org.apache.pdfbox.text.PDFTextStripper stripper = new org.apache.pdfbox.text.PDFTextStripper();
+                        String content = stripper.getText(document);
+                        book.setContent(content);
+                        log.debug("Successfully extracted text for Book ID: {}", book.getId());
+                    } catch (IOException e) {
+                        log.warn("Failed to extract text for Book ID: {}", book.getId(), e);
+                        book.setContent("");
+                    }
+                    
+                    // Generate thumbnail if not provided
+                    if (generateThumb) {
+                        String generatedThumbnailFileName = generateThumbnailFromPdf(finalPdfPath, finalThumbnailsPath);
+                        Path generatedThumbnailPath = finalThumbnailsPath.resolve(generatedThumbnailFileName);
+                        book.setThumbnailPath(generatedThumbnailPath.toString());
+                        log.debug("Successfully generated thumbnail for Book ID: {}", book.getId());
+                    }
+
+                    // Save the updated book to persist content and trigger Hibernate Search (Lucene) indexing
+                    log.info("Saving book with extracted content to trigger Lucene index for Book ID: {}", book.getId());
+                    bookRepository.save(book);
+                    log.info("Background processing and Lucene indexing completed for Book ID: {}", book.getId());
+                } catch (Exception e) {
+                    log.error("Error during background processing for Book ID: {}", book.getId(), e);
+                }
+            });
+
         } catch (AppException e) {
             cleanupFile(tempPdfPath);
             cleanupFile(pdfPath);
@@ -161,6 +185,13 @@ public class BookService {
         
         // Add auth/entitlement checks here if needed
         return Paths.get(book.getPdfFilePath());
+    }
+
+    @Transactional(readOnly = true)
+    public org.personal.library.dto.book.BookResponseDTO getBook(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
+        return mapToDTO(book);
     }
 
     @Transactional(readOnly = true)
