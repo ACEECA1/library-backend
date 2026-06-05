@@ -724,6 +724,44 @@
               "raw": "{\n  \"roleName\": \"MODERATOR\",\n  \"userIds\": [3, 4, 5]\n}"
             }
           }
+        },
+        {
+          "name": "Update Role Permissions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/roles/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "roles",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"permissions\": [\n    \"MANAGE_ROLES\",\n    \"USER_APPROVAL\"\n  ]\n}"
+            }
+          }
         }
       ]
     },

@@ -12,6 +12,7 @@ import org.personal.library.service.user.RoleManagementService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.personal.library.dto.role.RoleUpdateRequestDTO;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/roles")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('USER_APPROVAL')") // Assuming USER_APPROVAL implies admin access to manage roles
+@PreAuthorize("hasAuthority('MANAGE_ROLES')")
 public class RoleManagementController {
 
     private final RoleManagementService roleManagementService;
@@ -27,6 +28,13 @@ public class RoleManagementController {
     @PostMapping
     public ResponseEntity<ApiResponse<RoleResponseDTO>> createRole(@Valid @RequestBody RoleCreateRequestDTO request) {
         return ResponseEntity.ok(ApiResponse.success(roleManagementService.createRole(request), "Role created"));
+    }
+
+    @PutMapping("/{roleId}")
+    public ResponseEntity<ApiResponse<RoleResponseDTO>> updateRolePermissions(
+            @PathVariable Long roleId,
+            @Valid @RequestBody RoleUpdateRequestDTO request) {
+        return ResponseEntity.ok(ApiResponse.success(roleManagementService.updateRolePermissions(roleId, request), "Role permissions updated"));
     }
 
     @GetMapping

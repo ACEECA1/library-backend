@@ -27,8 +27,8 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
+        seedPermissionsAndRoles();
         if (userRepository.count() == 0) {
-            seedPermissionsAndRoles();
             seedAdminUser();
         }
     }

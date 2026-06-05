@@ -6,6 +6,7 @@ import org.personal.library.dao.RoleRepository;
 import org.personal.library.dao.UserRepository;
 import org.personal.library.dto.common.PaginatedResponse;
 import org.personal.library.dto.role.RoleCreateRequestDTO;
+import org.personal.library.dto.role.RoleUpdateRequestDTO;
 import org.personal.library.dto.role.RoleResponseDTO;
 import org.personal.library.model.Permission;
 import org.personal.library.model.Role;
@@ -48,6 +49,22 @@ public class RoleManagementService {
 
         Role saved = roleRepository.save(role);
         auditLogService.logAction("CREATE_ROLE", "Created role: " + saved.getName());
+        return mapToDTO(saved);
+    }
+
+    @Transactional
+    public RoleResponseDTO updateRolePermissions(Long roleId, RoleUpdateRequestDTO dto) {
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new AppException("Role not found", HttpStatus.NOT_FOUND));
+
+        Set<Permission> permissions = dto.getPermissions().stream()
+                .map(name -> permissionRepository.findByName(org.personal.library.model.PermissionType.valueOf(name))
+                        .orElseThrow(() -> new AppException("Permission not found: " + name, HttpStatus.BAD_REQUEST)))
+                .collect(Collectors.toSet());
+
+        role.setPermissions(permissions);
+        Role saved = roleRepository.save(role);
+        auditLogService.logAction("UPDATE_ROLE", "Updated permissions for role: " + saved.getName());
         return mapToDTO(saved);
     }
 
