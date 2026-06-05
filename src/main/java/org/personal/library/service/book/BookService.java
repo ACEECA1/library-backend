@@ -184,10 +184,11 @@ public class BookService {
     }
 
     /**
-     * Get book file path.
+     * Resolves the absolute path to the physical PDF file associated with a given book.
      *
-     * @param bookId the bookId
-     * @return the path
+     * @param bookId the unique identifier of the book to retrieve the path for
+     * @return the absolute Path to the book's PDF file on disk
+     * @throws AppException if the book does not exist in the database
      */
     public Path getBookFilePath(Long bookId) {
         Book book = bookRepository.findById(bookId)
@@ -224,9 +225,12 @@ public class BookService {
     }
 
     /**
-     * Approve book.
+     * Approves a pending book upload, making it live and visible to all users.
+     * The method updates the book's status and logs the approver.
+     * It also triggers audit logs and notifications for the approval action.
      *
-     * @param bookId the bookId
+     * @param bookId the unique identifier of the pending book to approve
+     * @throws AppException if the book is not found or is not in PENDING status
      */
     @Transactional
     public void approveBook(Long bookId) {
@@ -251,9 +255,11 @@ public class BookService {
     }
 
     /**
-     * Increment views.
+     * Increments the view count for a book when an authenticated user accesses it.
+     * It ensures that a given user's view is only counted once per book by checking the BookView repository.
      *
-     * @param bookId the bookId
+     * @param bookId the unique identifier of the book being viewed
+     * @throws AppException if the user or book cannot be found
      */
     @Transactional
     public void incrementViews(Long bookId) {

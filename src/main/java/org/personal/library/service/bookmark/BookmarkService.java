@@ -27,9 +27,11 @@ public class BookmarkService {
     private final UserRepository userRepository;
 
     /**
-     * Create bookmark.
+     * Creates a new bookmark for the currently authenticated user on a specific book.
+     * A user cannot bookmark the same book more than once.
      *
-     * @param dto the dto
+     * @param dto the data transfer object containing the book ID to bookmark and an optional personal note
+     * @throws AppException if the user is unauthorized, book not found, or bookmark already exists
      */
     @Transactional
     public void createBookmark(BookmarkRequestDTO dto) {
@@ -52,10 +54,11 @@ public class BookmarkService {
     }
 
     /**
-     * Get my bookmarks.
+     * Retrieves a paginated list of all bookmarks created by the currently authenticated user.
      *
-     * @param pageable the pageable
-     * @return the paginatedresponse
+     * @param pageable the pagination and sorting information
+     * @return a paginated response containing a list of the user's bookmark details
+     * @throws AppException if the current user cannot be identified
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<BookmarkResponseDTO> getMyBookmarks(Pageable pageable) {
@@ -74,9 +77,10 @@ public class BookmarkService {
     }
 
     /**
-     * Delete bookmark.
+     * Deletes an existing bookmark. The user can only delete their own bookmarks.
      *
-     * @param id the id
+     * @param id the unique identifier of the bookmark to delete
+     * @throws AppException if the bookmark doesn't exist or the user lacks permission
      */
     @Transactional
     public void deleteBookmark(Long id) {

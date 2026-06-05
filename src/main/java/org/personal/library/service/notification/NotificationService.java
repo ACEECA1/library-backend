@@ -24,11 +24,12 @@ public class NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
 
     /**
-     * Create for user.
+     * Creates a new notification for a specific user and sends it over WebSocket.
+     * The notification is saved to the database as unread and instantly broadcasted to the user's active session.
      *
-     * @param user the user
-     * @param message the message
-     * @return the notificationresponsedto
+     * @param user the recipient of the notification
+     * @param message the content of the notification
+     * @return a NotificationResponseDTO representing the newly created notification
      */
     @Transactional
     public NotificationResponseDTO createForUser(User user, String message) {
@@ -44,9 +45,10 @@ public class NotificationService {
     }
 
     /**
-     * Notify admins.
+     * Sends a system-wide notification to all users who possess the 'ADMIN' role.
+     * This is typically used for system alerts, pending approvals, or critical errors.
      *
-     * @param message the message
+     * @param message the content of the notification to be sent to admins
      */
     @Transactional
     public void notifyAdmins(String message) {
@@ -56,9 +58,10 @@ public class NotificationService {
     }
 
     /**
-     * Get current user notifications.
+     * Retrieves all notifications belonging to the currently authenticated user,
+     * ordered chronologically from the newest to the oldest.
      *
-     * @return the list
+     * @return a list of the user's mapped notifications
      */
     @Transactional(readOnly = true)
     public List<NotificationResponseDTO> getCurrentUserNotifications() {
@@ -69,10 +72,11 @@ public class NotificationService {
     }
 
     /**
-     * Mark as read.
+     * Marks a specific notification as 'read' if it belongs to the current user.
      *
-     * @param notificationId the notificationId
-     * @return the notificationresponsedto
+     * @param notificationId the unique identifier of the notification to mark as read
+     * @return the updated NotificationResponseDTO reflecting the read status
+     * @throws AppException if the notification cannot be found or doesn't belong to the user
      */
     @Transactional
     public NotificationResponseDTO markAsRead(Long notificationId) {
@@ -87,7 +91,8 @@ public class NotificationService {
     }
 
     /**
-     * Mark all as read.
+     * Marks all unread notifications belonging to the current authenticated user as 'read'.
+     * Useful for a "mark all as read" button in the UI.
      */
     @Transactional
     public void markAllAsRead() {

@@ -29,9 +29,11 @@ public class ReviewService {
     private final BadgeProducer badgeProducer;
 
     /**
-     * Add or update review.
+     * Submits a new review or updates an existing one for a specific book by the authenticated user.
+     * The overall average rating and review count of the book are recalculated and saved.
      *
-     * @param dto the dto
+     * @param dto the data transfer object containing the book ID, a text review, and a rating
+     * @throws AppException if the user is unauthorized or the book is not found
      */
     @Transactional
     public void addOrUpdateReview(ReviewRequestDTO dto) {
@@ -60,11 +62,11 @@ public class ReviewService {
     }
 
     /**
-     * Get reviews for book.
+     * Retrieves a paginated list of all reviews associated with a particular book.
      *
-     * @param bookId the bookId
-     * @param pageable the pageable
-     * @return the paginatedresponse
+     * @param bookId the unique identifier of the book whose reviews are being fetched
+     * @param pageable the pagination and sorting parameters
+     * @return a paginated response containing mapped ReviewResponseDTOs
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<ReviewResponseDTO> getReviewsForBook(Long bookId, Pageable pageable) {
@@ -81,9 +83,11 @@ public class ReviewService {
     }
 
     /**
-     * Delete review.
+     * Deletes a specific review from a book. 
+     * Users can delete their own reviews. Moderators can delete any review.
      *
-     * @param id the id
+     * @param id the unique identifier of the review to be deleted
+     * @throws AppException if the review cannot be found or the user lacks deletion privileges
      */
     @Transactional
     public void deleteReview(Long id) {

@@ -11,10 +11,12 @@ public class AuditLogService {
     private final AuditProducer auditProducer;
 
     /**
-     * Log action.
+     * Records an audit log entry for a specific action performed by a user.
+     * If the current user is authenticated, their username is attached to the log.
+     * Otherwise, the action is logged under 'anonymousUser'.
      *
-     * @param action the action
-     * @param details the details
+     * @param action a brief string representing the action type (e.g., "UPLOAD_BOOK", "APPROVE_USER")
+     * @param details a detailed description of the action and its context
      */
     public void logAction(String action, String details) {
         String username = SecurityUtils.getCurrentUsername();

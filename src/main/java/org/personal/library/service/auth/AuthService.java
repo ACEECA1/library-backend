@@ -38,10 +38,13 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
 
     /**
-     * Register user.
+     * Registers a new user account in the system.
+     * The user's status is initially set to PENDING, requiring an admin to approve the registration.
+     * It also triggers a notification to all admins that a new user is awaiting approval.
      *
-     * @param dto the dto
-     * @return the user
+     * @param dto the data transfer object containing the user's registration details (username, password, etc.)
+     * @return the newly created and saved User entity
+     * @throws AppException if the provided username is already taken
      */
     @Transactional
     public User registerUser(UserRegistrationDTO dto) {
@@ -63,10 +66,12 @@ public class AuthService {
     }
 
     /**
-     * Login.
+     * Authenticates a user based on their credentials and generates access/refresh tokens.
+     * If authentication is successful, the user's context is set in the SecurityContextHolder.
      *
-     * @param dto the dto
-     * @return the jwtresponsedto
+     * @param dto the data transfer object containing the user's login credentials (username and password)
+     * @return a JwtResponseDTO containing the JWT access token, refresh token, and user role information
+     * @throws AppException if the user is not found or authentication fails
      */
     @Transactional
     public JwtResponseDTO login(LoginDTO dto) {
@@ -92,10 +97,12 @@ public class AuthService {
     }
 
     /**
-     * Refresh token.
+     * Refreshes a user's JWT access token using a valid refresh token.
+     * The refresh token must exist in the database and not be expired.
      *
-     * @param request the request
-     * @return the jwtresponsedto
+     * @param request the data transfer object containing the user's current refresh token
+     * @return a new JwtResponseDTO containing the newly generated access token and the same refresh token
+     * @throws AppException if the refresh token is missing, invalid, or expired
      */
     @Transactional
     public JwtResponseDTO refreshToken(TokenRefreshRequestDTO request) {
@@ -115,9 +122,9 @@ public class AuthService {
     }
 
     /**
-     * Logout.
+     * Logs out a user by invalidating their current session and deleting all their active refresh tokens.
      *
-     * @param username the username
+     * @param username the username of the user to log out
      */
     @Transactional
     public void logout(String username) {
@@ -128,9 +135,11 @@ public class AuthService {
     }
 
     /**
-     * Change password.
+     * Changes the authenticated user's password securely.
+     * The user must provide their correct old password to authorize the change.
      *
-     * @param request the request
+     * @param request the data transfer object containing the old password and the new desired password
+     * @throws AppException if the user is not authenticated, not found, or the old password does not match
      */
     @Transactional
     public void changePassword(ChangePasswordRequestDTO request) {
@@ -151,9 +160,11 @@ public class AuthService {
     }
 
     /**
-     * Forgot password.
+     * Initiates a password reset process for a user who forgot their password.
+     * A PasswordResetRequest is generated with a PENDING status, and admins are notified to approve it.
      *
-     * @param request the request
+     * @param request the data transfer object containing the username of the account needing a reset
+     * @throws AppException if the user associated with the username is not found
      */
     @Transactional
     public void forgotPassword(ForgotPasswordRequestDTO request) {
@@ -169,9 +180,12 @@ public class AuthService {
     }
 
     /**
-     * Reset password.
+     * Completes the password reset process by applying the new password.
+     * This requires an approved reset token (usually provided by an admin).
+     * After successful password change, the reset token is marked as CONSUMED.
      *
-     * @param request the request
+     * @param request the data transfer object containing the valid reset token and the new password
+     * @throws AppException if the reset token is invalid, expired, or not approved
      */
     @Transactional
     public void resetPassword(ResetPasswordRequestDTO request) {
@@ -188,9 +202,10 @@ public class AuthService {
     }
 
     /**
-     * Get current user.
+     * Retrieves the profile and details of the currently authenticated user.
      *
-     * @return the userresponsedto
+     * @return a UserResponseDTO containing the user's basic profile, roles, and permissions
+     * @throws AppException if there is no authenticated user or the user cannot be found
      */
     @Transactional(readOnly = true)
     public UserResponseDTO getCurrentUser() {
@@ -206,10 +221,10 @@ public class AuthService {
     }
 
     /**
-     * Map to d t o.
+     * Converts a User entity into a UserResponseDTO, flattening roles and permissions into collections.
      *
-     * @param user the user
-     * @return the userresponsedto
+     * @param user the User entity to map
+     * @return the mapped UserResponseDTO
      */
     public UserResponseDTO mapToDTO(User user) {
         return UserResponseDTO.builder()

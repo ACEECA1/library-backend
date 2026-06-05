@@ -24,10 +24,12 @@ public class RefreshTokenService {
     private final AppProperties appProperties;
 
     /**
-     * Create refresh token.
+     * Generates and stores a new refresh token for a specific user.
+     * If the user already has a token, it will be overridden or updated.
      *
-     * @param userId the userId
-     * @return the refreshtoken
+     * @param userId the unique identifier of the user who needs the token
+     * @return the newly created and saved RefreshToken entity
+     * @throws AppException if the user does not exist
      */
     @Transactional
     public RefreshToken createRefreshToken(Long userId) {
@@ -43,10 +45,12 @@ public class RefreshTokenService {
     }
 
     /**
-     * Verify expiration.
+     * Verifies whether a given refresh token is still valid (not expired).
+     * If expired, it deletes the token from the database and throws an exception.
      *
-     * @param token the token
-     * @return the refreshtoken
+     * @param token the RefreshToken entity to check
+     * @return the same token if it is valid
+     * @throws AppException if the token has expired
      */
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
@@ -57,9 +61,10 @@ public class RefreshTokenService {
     }
 
     /**
-     * Delete by user id.
+     * Removes the refresh token associated with a particular user.
+     * Usually called upon user logout or session invalidation.
      *
-     * @param userId the userId
+     * @param userId the unique identifier of the user whose token is being deleted
      */
     @Transactional
     public void deleteByUserId(Long userId) {
@@ -69,10 +74,10 @@ public class RefreshTokenService {
     }
     
     /**
-     * Find by token.
+     * Finds a RefreshToken entity in the database using the raw token string.
      *
-     * @param token the token
-     * @return the optional
+     * @param token the raw UUID string of the refresh token
+     * @return an Optional wrapping the RefreshToken if found, or empty otherwise
      */
     public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);

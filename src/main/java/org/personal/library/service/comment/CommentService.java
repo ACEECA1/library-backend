@@ -36,10 +36,12 @@ public class CommentService {
     private final BadgeProducer badgeProducer;
 
     /**
-     * Add comment.
+     * Adds a new comment or reply to a book. The comment can optionally be marked as a draft.
+     * If published, it logs the action and notifies the book's uploader.
      *
-     * @param bookId the bookId
-     * @param dto the dto
+     * @param bookId the unique identifier of the book being commented on
+     * @param dto the data transfer object containing the comment text, optional parent ID (for replies), and draft status
+     * @throws AppException if the user or book is not found, or if an invalid parent comment ID is provided
      */
     @Transactional
     public void addComment(Long bookId, CommentRequestDTO dto) {
@@ -77,11 +79,11 @@ public class CommentService {
     }
 
     /**
-     * Get comments for book.
+     * Retrieves a paginated list of published, top-level comments (not replies) for a specific book.
      *
-     * @param bookId the bookId
-     * @param pageable the pageable
-     * @return the paginatedresponse
+     * @param bookId the unique identifier of the book whose comments are being retrieved
+     * @param pageable the pagination and sorting parameters
+     * @return a paginated response containing the list of mapped comment DTOs
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<CommentResponseDTO> getCommentsForBook(Long bookId, Pageable pageable) {
@@ -103,10 +105,13 @@ public class CommentService {
     }
 
     /**
-     * Update comment.
+     * Updates an existing comment's text or draft status.
+     * If the comment was a draft and is now published, notifications are sent.
+     * Only the author of the comment is permitted to update it.
      *
-     * @param commentId the commentId
-     * @param dto the dto
+     * @param commentId the unique identifier of the comment to update
+     * @param dto the data transfer object containing the updated text and draft status
+     * @throws AppException if the comment is not found or the user is not the author
      */
     @Transactional
     public void updateComment(Long commentId, CommentRequestDTO dto) {
@@ -131,9 +136,12 @@ public class CommentService {
     }
 
     /**
-     * Upvote comment.
+     * Registers or toggles an upvote by the authenticated user on a specific comment.
+     * If the user already upvoted, the vote is removed. If they downvoted previously, it switches to an upvote.
+     * This may also trigger a badge event evaluation for the comment's author.
      *
-     * @param commentId the commentId
+     * @param commentId the unique identifier of the comment being upvoted
+     * @throws AppException if the user or comment cannot be found
      */
     @Transactional
     public void upvoteComment(Long commentId) {
@@ -168,9 +176,11 @@ public class CommentService {
     }
 
     /**
-     * Downvote comment.
+     * Registers or toggles a downvote by the authenticated user on a specific comment.
+     * If the user already downvoted, the vote is removed. If they upvoted previously, it switches to a downvote.
      *
-     * @param commentId the commentId
+     * @param commentId the unique identifier of the comment being downvoted
+     * @throws AppException if the user or comment cannot be found
      */
     @Transactional
     public void downvoteComment(Long commentId) {
@@ -221,9 +231,11 @@ public class CommentService {
     }
 
     /**
-     * Delete comment.
+     * Deletes a comment from the database.
+     * Only the original author of the comment or a user with MODERATE_COMMENTS privileges can delete it.
      *
-     * @param commentId the commentId
+     * @param commentId the unique identifier of the comment to delete
+     * @throws AppException if the comment is not found or the user lacks deletion permissions
      */
     @Transactional
     public void deleteComment(Long commentId) {

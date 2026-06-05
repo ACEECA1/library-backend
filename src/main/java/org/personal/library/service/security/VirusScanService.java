@@ -21,9 +21,11 @@ public class VirusScanService {
     private final org.personal.library.config.AppProperties appProperties;
 
     /**
-     * Scan pdf.
+     * Submits a physical PDF file to a ClamAV server to scan for viruses or malicious payloads.
+     * If the virus scan feature is disabled in the app properties, it bypasses the scan securely.
      *
-     * @param pdfPath the pdfPath
+     * @param pdfPath the absolute path on disk to the PDF file
+     * @throws AppException if a virus is found, or if the connection to ClamAV fails
      */
     public void scanPdf(Path pdfPath) {
         if (!appProperties.getVirusScan().isEnabled()) {

@@ -33,10 +33,12 @@ public class RoleManagementService {
     private final AuditLogService auditLogService;
 
     /**
-     * Create role.
+     * Creates a new role with a specified set of permissions.
+     * Throws an exception if a role with the same name already exists.
      *
-     * @param dto the dto
-     * @return the roleresponsedto
+     * @param dto the data transfer object containing the role's name and its requested permissions
+     * @return a RoleResponseDTO describing the successfully created role
+     * @throws AppException if the role name is taken or a requested permission does not exist
      */
     @Transactional
     public RoleResponseDTO createRole(RoleCreateRequestDTO dto) {
@@ -59,11 +61,13 @@ public class RoleManagementService {
     }
 
     /**
-     * Update role permissions.
+     * Updates an existing role by replacing its current permissions with a new set.
+     * Useful for adjusting access control without deleting and recreating a role.
      *
-     * @param roleId the roleId
-     * @param dto the dto
-     * @return the roleresponsedto
+     * @param roleId the unique identifier of the role to update
+     * @param dto the data transfer object containing the new set of permission names
+     * @return the updated RoleResponseDTO
+     * @throws AppException if the role or any requested permission is not found
      */
     @Transactional
     public RoleResponseDTO updateRolePermissions(Long roleId, RoleUpdateRequestDTO dto) {
@@ -82,10 +86,10 @@ public class RoleManagementService {
     }
 
     /**
-     * Get roles.
+     * Retrieves a paginated list of all roles configured in the system.
      *
-     * @param pageable the pageable
-     * @return the paginatedresponse
+     * @param pageable the pagination parameters
+     * @return a paginated response of role DTOs
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<RoleResponseDTO> getRoles(Pageable pageable) {
@@ -95,9 +99,10 @@ public class RoleManagementService {
     }
 
     /**
-     * Get permissions.
+     * Returns a full list of all available permission names in the system.
+     * Typically used by the frontend to populate role-creation forms.
      *
-     * @return the list
+     * @return an alphabetically sorted list of permission names
      */
     @Transactional(readOnly = true)
     public List<String> getPermissions() {
@@ -108,10 +113,12 @@ public class RoleManagementService {
     }
 
     /**
-     * Assign roles to user.
+     * Assigns one or multiple roles to a specific user.
+     * Active user sessions will be invalidated to enforce the new permissions immediately on their next request.
      *
-     * @param userId the userId
-     * @param roleNames the roleNames
+     * @param userId the unique identifier of the user receiving the roles
+     * @param roleNames a set of role names to append to the user's current roles
+     * @throws AppException if the user or any role name is not found
      */
     @Transactional
     public void assignRolesToUser(Long userId, Set<String> roleNames) {
@@ -129,10 +136,12 @@ public class RoleManagementService {
     }
 
     /**
-     * Assign role to users bulk.
+     * Assigns a single role to multiple users at once.
+     * This is highly efficient for batch-promoting users (e.g., granting 'MODERATOR' to a list of trusted users).
      *
-     * @param roleName the roleName
-     * @param userIds the userIds
+     * @param roleName the name of the role being assigned
+     * @param userIds a list of user IDs to receive the role
+     * @throws AppException if the role or any of the provided users are not found
      */
     @Transactional
     public void assignRoleToUsersBulk(String roleName, List<Long> userIds) {

@@ -33,10 +33,11 @@ public class UserManagementService {
     private final RefreshTokenService refreshTokenService;
 
     /**
-     * Get pending users.
+     * Retrieves a paginated list of users whose registrations are currently pending approval.
+     * Typically used by admins to vet new accounts before allowing them access.
      *
-     * @param pageable the pageable
-     * @return the paginatedresponse
+     * @param pageable the pagination parameters
+     * @return a paginated response containing the list of pending UserResponseDTOs
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<UserResponseDTO> getPendingUsers(Pageable pageable) {
@@ -46,9 +47,11 @@ public class UserManagementService {
     }
 
     /**
-     * Approve user.
+     * Approves a user's pending registration, transitioning their status from PENDING to ACTIVE.
+     * This grants them access to login and use the platform.
      *
-     * @param userId the userId
+     * @param userId the unique identifier of the user to approve
+     * @throws AppException if the user is not found or is not currently in a PENDING state
      */
     @Transactional
     public void approveUser(Long userId) {
@@ -66,9 +69,11 @@ public class UserManagementService {
     }
 
     /**
-     * Ban user.
+     * Permanently bans a user account, changing its status to BANNED.
+     * This instantly invalidates all of the user's active refresh tokens, preventing new access tokens from being issued.
      *
-     * @param userId the userId
+     * @param userId the unique identifier of the user to ban
+     * @throws AppException if the user cannot be found
      */
     @Transactional
     public void banUser(Long userId) {
@@ -84,10 +89,12 @@ public class UserManagementService {
     }
 
     /**
-     * Timeout user.
+     * Imposes a temporary timeout on a user account by setting a 'bannedUntil' timestamp.
+     * Similar to a permanent ban, this destroys current refresh tokens, forcing a re-authentication attempt which will fail until the time expires.
      *
-     * @param userId the userId
-     * @param minutes the minutes
+     * @param userId the unique identifier of the user to timeout
+     * @param minutes the duration of the timeout in minutes
+     * @throws AppException if the user cannot be found
      */
     @Transactional
     public void timeoutUser(Long userId, int minutes) {
@@ -103,10 +110,11 @@ public class UserManagementService {
     }
 
     /**
-     * Get pending password resets.
+     * Retrieves a paginated list of password reset requests that have a PENDING status.
+     * Admins review these requests to determine if they are legitimate.
      *
-     * @param pageable the pageable
-     * @return the paginatedresponse
+     * @param pageable the pagination parameters
+     * @return a paginated response of pending reset requests
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<PasswordResetRequestResponseDTO> getPendingPasswordResets(Pageable pageable) {
@@ -122,10 +130,12 @@ public class UserManagementService {
     }
 
     /**
-     * Approve password reset.
+     * Approves a pending password reset request.
+     * This generates a secure UUID token that the user must provide alongside their new password to complete the reset.
      *
-     * @param requestId the requestId
-     * @return the string
+     * @param requestId the unique identifier of the pending PasswordResetRequest
+     * @return the generated secure UUID reset token
+     * @throws AppException if the request is missing or not in a PENDING state
      */
     @Transactional
     public String approvePasswordReset(Long requestId) {
@@ -149,9 +159,11 @@ public class UserManagementService {
     }
 
     /**
-     * Reject password reset.
+     * Rejects a pending password reset request.
+     * This is used if the admin suspects the reset request was fraudulent or accidental.
      *
-     * @param requestId the requestId
+     * @param requestId the unique identifier of the PasswordResetRequest to reject
+     * @throws AppException if the request is not found or is not in a PENDING state
      */
     @Transactional
     public void rejectPasswordReset(Long requestId) {

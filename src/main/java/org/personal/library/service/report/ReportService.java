@@ -26,9 +26,11 @@ public class ReportService {
     private final AuditLogService auditLogService;
 
     /**
-     * Submit report.
+     * Submits a new moderation report against a specific target (e.g., Book, Comment, User).
+     * The report is stored as unresolved, waiting for an administrator's review.
      *
-     * @param dto the dto
+     * @param dto the data transfer object containing the report's reason, target ID, and target type
+     * @throws AppException if the user is not authenticated or not found
      */
     @Transactional
     public void submitReport(ReportRequestDTO dto) {
@@ -52,11 +54,12 @@ public class ReportService {
     }
 
     /**
-     * Get reports.
+     * Retrieves a paginated list of reports, filtered by their resolution status.
+     * Typically used by administrators or moderators.
      *
-     * @param resolved the resolved
-     * @param pageable the pageable
-     * @return the paginatedresponse
+     * @param resolved a boolean flag; true to fetch resolved reports, false to fetch unresolved ones
+     * @param pageable the pagination and sorting parameters
+     * @return a paginated response containing mapped ReportResponseDTOs
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<ReportResponseDTO> getReports(boolean resolved, Pageable pageable) {
@@ -66,9 +69,11 @@ public class ReportService {
     }
 
     /**
-     * Resolve report.
+     * Marks an existing report as resolved after a moderator has addressed the issue.
+     * It also logs an audit trail of the resolution.
      *
-     * @param reportId the reportId
+     * @param reportId the unique identifier of the report to mark as resolved
+     * @throws AppException if the report with the given ID cannot be found
      */
     @Transactional
     public void resolveReport(Long reportId) {

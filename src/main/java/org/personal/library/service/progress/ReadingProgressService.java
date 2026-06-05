@@ -25,10 +25,12 @@ public class ReadingProgressService {
     private final UserRepository userRepository;
 
     /**
-     * Update progress.
+     * Updates or creates a reading progress record for the currently authenticated user
+     * for a particular book. It logs the last page read and the timestamp of the activity.
      *
-     * @param bookId the bookId
-     * @param page the page
+     * @param bookId the unique identifier of the book the user is reading
+     * @param page the current page number the user has reached
+     * @throws AppException if the user is unauthorized or the book is not found
      */
     @Transactional
     public void updateProgress(Long bookId, int page) {
@@ -53,10 +55,12 @@ public class ReadingProgressService {
     }
 
     /**
-     * Get progress.
+     * Retrieves the reading progress for the currently authenticated user on a specific book.
+     * If the user hasn't started reading, it defaults to returning page 0.
      *
-     * @param bookId the bookId
-     * @return the readingprogressdto
+     * @param bookId the unique identifier of the book
+     * @return a ReadingProgressDTO containing the last page read and timestamp
+     * @throws AppException if the user is unauthorized
      */
     @Transactional(readOnly = true)
     public ReadingProgressDTO getProgress(Long bookId) {
