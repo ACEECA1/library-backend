@@ -24,6 +24,12 @@ public class ReadingProgressService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Update progress.
+     *
+     * @param bookId the bookId
+     * @param page the page
+     */
     @Transactional
     public void updateProgress(Long bookId, int page) {
         String username = SecurityUtils.getCurrentUsername();
@@ -46,6 +52,12 @@ public class ReadingProgressService {
         progressRepository.save(progress);
     }
 
+    /**
+     * Get progress.
+     *
+     * @param bookId the bookId
+     * @return the readingprogressdto
+     */
     @Transactional(readOnly = true)
     public ReadingProgressDTO getProgress(Long bookId) {
         String username = SecurityUtils.getCurrentUsername();

@@ -10,6 +10,12 @@ public class AuditLogService {
 
     private final AuditProducer auditProducer;
 
+    /**
+     * Log action.
+     *
+     * @param action the action
+     * @param details the details
+     */
     public void logAction(String action, String details) {
         String username = SecurityUtils.getCurrentUsername();
         if (username != null && !username.equals("anonymousUser")) {

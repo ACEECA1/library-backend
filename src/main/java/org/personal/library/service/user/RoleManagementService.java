@@ -32,6 +32,12 @@ public class RoleManagementService {
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
 
+    /**
+     * Create role.
+     *
+     * @param dto the dto
+     * @return the roleresponsedto
+     */
     @Transactional
     public RoleResponseDTO createRole(RoleCreateRequestDTO dto) {
         if (roleRepository.findByName(dto.getName()).isPresent()) {
@@ -52,6 +58,13 @@ public class RoleManagementService {
         return mapToDTO(saved);
     }
 
+    /**
+     * Update role permissions.
+     *
+     * @param roleId the roleId
+     * @param dto the dto
+     * @return the roleresponsedto
+     */
     @Transactional
     public RoleResponseDTO updateRolePermissions(Long roleId, RoleUpdateRequestDTO dto) {
         Role role = roleRepository.findById(roleId)
@@ -68,6 +81,12 @@ public class RoleManagementService {
         return mapToDTO(saved);
     }
 
+    /**
+     * Get roles.
+     *
+     * @param pageable the pageable
+     * @return the paginatedresponse
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<RoleResponseDTO> getRoles(Pageable pageable) {
         Page<RoleResponseDTO> page = roleRepository.findAll(pageable)
@@ -75,6 +94,11 @@ public class RoleManagementService {
         return PaginatedResponse.from(page);
     }
 
+    /**
+     * Get permissions.
+     *
+     * @return the list
+     */
     @Transactional(readOnly = true)
     public List<String> getPermissions() {
         return permissionRepository.findAll().stream()
@@ -83,6 +107,12 @@ public class RoleManagementService {
                 .toList();
     }
 
+    /**
+     * Assign roles to user.
+     *
+     * @param userId the userId
+     * @param roleNames the roleNames
+     */
     @Transactional
     public void assignRolesToUser(Long userId, Set<String> roleNames) {
         User user = userRepository.findById(userId)
@@ -98,6 +128,12 @@ public class RoleManagementService {
         auditLogService.logAction("ASSIGN_ROLE", "Assigned roles to user ID: " + userId);
     }
 
+    /**
+     * Assign role to users bulk.
+     *
+     * @param roleName the roleName
+     * @param userIds the userIds
+     */
     @Transactional
     public void assignRoleToUsersBulk(String roleName, List<Long> userIds) {
         Role role = roleRepository.findByName(roleName)

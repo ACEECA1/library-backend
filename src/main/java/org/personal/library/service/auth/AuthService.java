@@ -37,6 +37,12 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final RefreshTokenService refreshTokenService;
 
+    /**
+     * Register user.
+     *
+     * @param dto the dto
+     * @return the user
+     */
     @Transactional
     public User registerUser(UserRegistrationDTO dto) {
         if (userRepository.existsByUsername(dto.getUsername())) {
@@ -56,6 +62,12 @@ public class AuthService {
         return savedUser;
     }
 
+    /**
+     * Login.
+     *
+     * @param dto the dto
+     * @return the jwtresponsedto
+     */
     @Transactional
     public JwtResponseDTO login(LoginDTO dto) {
         Authentication authentication = authenticationManager.authenticate(
@@ -79,6 +91,12 @@ public class AuthService {
                 .build();
     }
 
+    /**
+     * Refresh token.
+     *
+     * @param request the request
+     * @return the jwtresponsedto
+     */
     @Transactional
     public JwtResponseDTO refreshToken(TokenRefreshRequestDTO request) {
         return refreshTokenService.findByToken(request.getRefreshToken())
@@ -96,6 +114,11 @@ public class AuthService {
                 .orElseThrow(() -> new AppException("Refresh token is not in database!", HttpStatus.FORBIDDEN));
     }
 
+    /**
+     * Logout.
+     *
+     * @param username the username
+     */
     @Transactional
     public void logout(String username) {
         User user = userRepository.findByUsername(username).orElse(null);
@@ -104,6 +127,11 @@ public class AuthService {
         }
     }
 
+    /**
+     * Change password.
+     *
+     * @param request the request
+     */
     @Transactional
     public void changePassword(ChangePasswordRequestDTO request) {
         String username = SecurityUtils.getCurrentUsername();
@@ -122,6 +150,11 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    /**
+     * Forgot password.
+     *
+     * @param request the request
+     */
     @Transactional
     public void forgotPassword(ForgotPasswordRequestDTO request) {
         User user = userRepository.findByUsername(request.getUsername())
@@ -135,6 +168,11 @@ public class AuthService {
         notificationService.notifyAdmins("Password reset requested for user: " + user.getUsername());
     }
 
+    /**
+     * Reset password.
+     *
+     * @param request the request
+     */
     @Transactional
     public void resetPassword(ResetPasswordRequestDTO request) {
         PasswordResetRequest resetRequest = passwordResetRequestRepository.findByResetTokenAndStatus(
@@ -149,6 +187,11 @@ public class AuthService {
         passwordResetRequestRepository.save(resetRequest);
     }
 
+    /**
+     * Get current user.
+     *
+     * @return the userresponsedto
+     */
     @Transactional(readOnly = true)
     public UserResponseDTO getCurrentUser() {
         String username = SecurityUtils.getCurrentUsername();
@@ -162,6 +205,12 @@ public class AuthService {
         return mapToDTO(user);
     }
 
+    /**
+     * Map to d t o.
+     *
+     * @param user the user
+     * @return the userresponsedto
+     */
     public UserResponseDTO mapToDTO(User user) {
         return UserResponseDTO.builder()
                 .id(user.getId())

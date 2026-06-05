@@ -25,6 +25,11 @@ public class ReportService {
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
 
+    /**
+     * Submit report.
+     *
+     * @param dto the dto
+     */
     @Transactional
     public void submitReport(ReportRequestDTO dto) {
         String username = SecurityUtils.getCurrentUsername();
@@ -46,6 +51,13 @@ public class ReportService {
         auditLogService.logAction("SUBMIT_REPORT", "Reported " + dto.getTargetType() + " ID: " + dto.getTargetId());
     }
 
+    /**
+     * Get reports.
+     *
+     * @param resolved the resolved
+     * @param pageable the pageable
+     * @return the paginatedresponse
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<ReportResponseDTO> getReports(boolean resolved, Pageable pageable) {
         Page<ReportResponseDTO> page = reportRepository.findByIsResolved(resolved, pageable)
@@ -53,6 +65,11 @@ public class ReportService {
         return PaginatedResponse.from(page);
     }
 
+    /**
+     * Resolve report.
+     *
+     * @param reportId the reportId
+     */
     @Transactional
     public void resolveReport(Long reportId) {
         Report report = reportRepository.findById(reportId)

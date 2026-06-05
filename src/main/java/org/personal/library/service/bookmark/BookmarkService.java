@@ -26,6 +26,11 @@ public class BookmarkService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Create bookmark.
+     *
+     * @param dto the dto
+     */
     @Transactional
     public void createBookmark(BookmarkRequestDTO dto) {
         String username = SecurityUtils.getCurrentUsername();
@@ -46,6 +51,12 @@ public class BookmarkService {
         bookmarkRepository.save(bookmark);
     }
 
+    /**
+     * Get my bookmarks.
+     *
+     * @param pageable the pageable
+     * @return the paginatedresponse
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<BookmarkResponseDTO> getMyBookmarks(Pageable pageable) {
         String username = SecurityUtils.getCurrentUsername();
@@ -62,6 +73,11 @@ public class BookmarkService {
         return PaginatedResponse.from(page);
     }
 
+    /**
+     * Delete bookmark.
+     *
+     * @param id the id
+     */
     @Transactional
     public void deleteBookmark(Long id) {
         String username = SecurityUtils.getCurrentUsername();

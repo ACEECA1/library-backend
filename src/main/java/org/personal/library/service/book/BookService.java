@@ -183,6 +183,12 @@ public class BookService {
         }
     }
 
+    /**
+     * Get book file path.
+     *
+     * @param bookId the bookId
+     * @return the path
+     */
     public Path getBookFilePath(Long bookId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
@@ -217,6 +223,11 @@ public class BookService {
         return PaginatedResponse.from(page.map(this::mapToDTO));
     }
 
+    /**
+     * Approve book.
+     *
+     * @param bookId the bookId
+     */
     @Transactional
     public void approveBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
@@ -239,6 +250,11 @@ public class BookService {
         }
     }
 
+    /**
+     * Increment views.
+     *
+     * @param bookId the bookId
+     */
     @Transactional
     public void incrementViews(Long bookId) {
         String username = SecurityUtils.getCurrentUsername();

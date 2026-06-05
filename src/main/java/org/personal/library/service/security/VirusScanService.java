@@ -20,6 +20,11 @@ public class VirusScanService {
 
     private final org.personal.library.config.AppProperties appProperties;
 
+    /**
+     * Scan pdf.
+     *
+     * @param pdfPath the pdfPath
+     */
     public void scanPdf(Path pdfPath) {
         if (!appProperties.getVirusScan().isEnabled()) {
             log.info("Virus scan is disabled. Skipping scan for: {}", pdfPath);

@@ -28,6 +28,11 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final BadgeProducer badgeProducer;
 
+    /**
+     * Add or update review.
+     *
+     * @param dto the dto
+     */
     @Transactional
     public void addOrUpdateReview(ReviewRequestDTO dto) {
         String username = SecurityUtils.getCurrentUsername();
@@ -54,6 +59,13 @@ public class ReviewService {
         badgeProducer.publishEvent("REVIEW", user.getId());
     }
 
+    /**
+     * Get reviews for book.
+     *
+     * @param bookId the bookId
+     * @param pageable the pageable
+     * @return the paginatedresponse
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<ReviewResponseDTO> getReviewsForBook(Long bookId, Pageable pageable) {
         Page<ReviewResponseDTO> page = reviewRepository.findByBookId(bookId, pageable)
@@ -68,6 +80,11 @@ public class ReviewService {
         return PaginatedResponse.from(page);
     }
 
+    /**
+     * Delete review.
+     *
+     * @param id the id
+     */
     @Transactional
     public void deleteReview(Long id) {
         String username = SecurityUtils.getCurrentUsername();

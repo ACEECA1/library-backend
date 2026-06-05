@@ -23,6 +23,12 @@ public class RefreshTokenService {
     private final UserRepository userRepository;
     private final AppProperties appProperties;
 
+    /**
+     * Create refresh token.
+     *
+     * @param userId the userId
+     * @return the refreshtoken
+     */
     @Transactional
     public RefreshToken createRefreshToken(Long userId) {
         User user = userRepository.findById(userId)
@@ -36,6 +42,12 @@ public class RefreshTokenService {
         return refreshTokenRepository.save(refreshToken);
     }
 
+    /**
+     * Verify expiration.
+     *
+     * @param token the token
+     * @return the refreshtoken
+     */
     public RefreshToken verifyExpiration(RefreshToken token) {
         if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(token);
@@ -44,6 +56,11 @@ public class RefreshTokenService {
         return token;
     }
 
+    /**
+     * Delete by user id.
+     *
+     * @param userId the userId
+     */
     @Transactional
     public void deleteByUserId(Long userId) {
         User user = userRepository.findById(userId)
@@ -51,6 +68,12 @@ public class RefreshTokenService {
         refreshTokenRepository.deleteByUser(user);
     }
     
+    /**
+     * Find by token.
+     *
+     * @param token the token
+     * @return the optional
+     */
     public Optional<RefreshToken> findByToken(String token) {
         return refreshTokenRepository.findByToken(token);
     }

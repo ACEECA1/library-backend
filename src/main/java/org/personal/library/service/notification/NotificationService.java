@@ -23,6 +23,13 @@ public class NotificationService {
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
+    /**
+     * Create for user.
+     *
+     * @param user the user
+     * @param message the message
+     * @return the notificationresponsedto
+     */
     @Transactional
     public NotificationResponseDTO createForUser(User user, String message) {
         Notification notification = new Notification();
@@ -36,6 +43,11 @@ public class NotificationService {
         return response;
     }
 
+    /**
+     * Notify admins.
+     *
+     * @param message the message
+     */
     @Transactional
     public void notifyAdmins(String message) {
         userRepository.findAll().stream()
@@ -43,6 +55,11 @@ public class NotificationService {
                 .forEach(admin -> createForUser(admin, message));
     }
 
+    /**
+     * Get current user notifications.
+     *
+     * @return the list
+     */
     @Transactional(readOnly = true)
     public List<NotificationResponseDTO> getCurrentUserNotifications() {
         User user = getCurrentUser();
@@ -51,6 +68,12 @@ public class NotificationService {
                 .toList();
     }
 
+    /**
+     * Mark as read.
+     *
+     * @param notificationId the notificationId
+     * @return the notificationresponsedto
+     */
     @Transactional
     public NotificationResponseDTO markAsRead(Long notificationId) {
         User user = getCurrentUser();
@@ -63,6 +86,9 @@ public class NotificationService {
         return mapToDTO(notification);
     }
 
+    /**
+     * Mark all as read.
+     */
     @Transactional
     public void markAllAsRead() {
         User user = getCurrentUser();

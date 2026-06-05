@@ -32,6 +32,12 @@ public class UserManagementService {
     private final AuditLogService auditLogService;
     private final RefreshTokenService refreshTokenService;
 
+    /**
+     * Get pending users.
+     *
+     * @param pageable the pageable
+     * @return the paginatedresponse
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<UserResponseDTO> getPendingUsers(Pageable pageable) {
         Page<UserResponseDTO> page = userRepository.findByStatus(User.UserStatus.PENDING, pageable)
@@ -39,6 +45,11 @@ public class UserManagementService {
         return PaginatedResponse.from(page);
     }
 
+    /**
+     * Approve user.
+     *
+     * @param userId the userId
+     */
     @Transactional
     public void approveUser(Long userId) {
         User user = userRepository.findById(userId)
@@ -54,6 +65,11 @@ public class UserManagementService {
         auditLogService.logAction("APPROVE_USER", "Approved user ID: " + userId);
     }
 
+    /**
+     * Ban user.
+     *
+     * @param userId the userId
+     */
     @Transactional
     public void banUser(Long userId) {
         User user = userRepository.findById(userId)
@@ -67,6 +83,12 @@ public class UserManagementService {
         auditLogService.logAction("BAN_USER", "Banned user ID: " + userId);
     }
 
+    /**
+     * Timeout user.
+     *
+     * @param userId the userId
+     * @param minutes the minutes
+     */
     @Transactional
     public void timeoutUser(Long userId, int minutes) {
         User user = userRepository.findById(userId)
@@ -80,6 +102,12 @@ public class UserManagementService {
         auditLogService.logAction("TIMEOUT_USER", "Timed out user ID: " + userId + " for " + minutes + " minutes");
     }
 
+    /**
+     * Get pending password resets.
+     *
+     * @param pageable the pageable
+     * @return the paginatedresponse
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<PasswordResetRequestResponseDTO> getPendingPasswordResets(Pageable pageable) {
         Page<PasswordResetRequestResponseDTO> page = passwordResetRequestRepository
@@ -93,6 +121,12 @@ public class UserManagementService {
         return PaginatedResponse.from(page);
     }
 
+    /**
+     * Approve password reset.
+     *
+     * @param requestId the requestId
+     * @return the string
+     */
     @Transactional
     public String approvePasswordReset(Long requestId) {
         PasswordResetRequest request = passwordResetRequestRepository.findById(requestId)
@@ -114,6 +148,11 @@ public class UserManagementService {
         return token;
     }
 
+    /**
+     * Reject password reset.
+     *
+     * @param requestId the requestId
+     */
     @Transactional
     public void rejectPasswordReset(Long requestId) {
         PasswordResetRequest request = passwordResetRequestRepository.findById(requestId)

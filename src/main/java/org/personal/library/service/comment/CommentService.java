@@ -35,6 +35,12 @@ public class CommentService {
     private final org.personal.library.service.notification.NotificationService notificationService;
     private final BadgeProducer badgeProducer;
 
+    /**
+     * Add comment.
+     *
+     * @param bookId the bookId
+     * @param dto the dto
+     */
     @Transactional
     public void addComment(Long bookId, CommentRequestDTO dto) {
         String username = SecurityUtils.getCurrentUsername();
@@ -70,6 +76,13 @@ public class CommentService {
         }
     }
 
+    /**
+     * Get comments for book.
+     *
+     * @param bookId the bookId
+     * @param pageable the pageable
+     * @return the paginatedresponse
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<CommentResponseDTO> getCommentsForBook(Long bookId, Pageable pageable) {
         Page<CommentResponseDTO> page = commentRepository.findByBookIdAndParentCommentIsNullAndIsDraftFalse(bookId, pageable)
@@ -89,6 +102,12 @@ public class CommentService {
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 
+    /**
+     * Update comment.
+     *
+     * @param commentId the commentId
+     * @param dto the dto
+     */
     @Transactional
     public void updateComment(Long commentId, CommentRequestDTO dto) {
         String username = SecurityUtils.getCurrentUsername();
@@ -111,6 +130,11 @@ public class CommentService {
         }
     }
 
+    /**
+     * Upvote comment.
+     *
+     * @param commentId the commentId
+     */
     @Transactional
     public void upvoteComment(Long commentId) {
         String username = SecurityUtils.getCurrentUsername();
@@ -143,6 +167,11 @@ public class CommentService {
         badgeProducer.publishEvent("UPVOTE", comment.getUser().getId());
     }
 
+    /**
+     * Downvote comment.
+     *
+     * @param commentId the commentId
+     */
     @Transactional
     public void downvoteComment(Long commentId) {
         String username = SecurityUtils.getCurrentUsername();
@@ -191,6 +220,11 @@ public class CommentService {
                 .build();
     }
 
+    /**
+     * Delete comment.
+     *
+     * @param commentId the commentId
+     */
     @Transactional
     public void deleteComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
