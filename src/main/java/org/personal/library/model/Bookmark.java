@@ -27,7 +27,7 @@ public class Bookmark {
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    // General bookmark for the book (e.g. "read later").
+    
 
     @Column(length = 255)
     private String note;

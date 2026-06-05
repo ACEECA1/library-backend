@@ -12,5 +12,5 @@ public class ReviewRequestDTO {
     @Max(5)
     private int rating;
     
-    private String text; // optional
+    private String text; 
 }

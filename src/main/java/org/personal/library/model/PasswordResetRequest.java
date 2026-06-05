@@ -26,7 +26,7 @@ public class PasswordResetRequest {
     private ResetStatus status = ResetStatus.PENDING;
 
     @Column(unique = true)
-    private String resetToken; // Generated upon approval
+    private String resetToken; 
 
     @CreationTimestamp
     @Column(updatable = false)

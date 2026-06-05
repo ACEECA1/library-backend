@@ -8,5 +8,5 @@ public class MetadataRequestDTO {
     @NotBlank(message = "Name cannot be empty")
     private String name;
     
-    private String description; // Used for Author biography or Series description
+    private String description; 
 }

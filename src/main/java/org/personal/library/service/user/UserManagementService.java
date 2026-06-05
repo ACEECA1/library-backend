@@ -109,8 +109,8 @@ public class UserManagementService {
         passwordResetRequestRepository.save(request);
         auditLogService.logAction("APPROVE_PASSWORD_RESET", "Approved password reset for user ID: " + request.getUser().getId());
         
-        // Normally this token is sent via email, but for an intranet application without email,
-        // we can return it directly to the admin to give to the user manually, or via a notification.
+        
+        
         return token;
     }
 

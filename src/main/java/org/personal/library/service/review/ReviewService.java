@@ -91,7 +91,7 @@ public class ReviewService {
     }
 
     private void updateBookRating(Book book) {
-        // Recalculate average
+        
         Double avg = bookRepository.getAverageRatingForBook(book.getId());
         Long count = bookRepository.getReviewCountForBook(book.getId());
         book.setAverageRating(avg != null ? avg : 0.0);

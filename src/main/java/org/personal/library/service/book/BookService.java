@@ -69,7 +69,7 @@ public class BookService {
             Path booksPath = Paths.get(appProperties.getStorage().getBooks());
             Path thumbnailsPath = Paths.get(appProperties.getStorage().getThumbnails());
 
-            // Ensure directories exist
+            
             Files.createDirectories(booksPath);
             Files.createDirectories(thumbnailsPath);
 
@@ -114,7 +114,7 @@ public class BookService {
                 book.setSeries(seriesRepository.findById(seriesId).orElse(null));
             }
 
-            // If user is ADMIN, go LIVE directly, else PENDING
+            
             boolean isAdmin = uploader.getRoles().stream().anyMatch(r -> r.getName().equals("ADMIN"));
             if (isAdmin) {
                 book.setStatus(Book.BookStatus.LIVE);
@@ -142,7 +142,7 @@ public class BookService {
             java.util.concurrent.CompletableFuture.runAsync(() -> {
                 log.info("Starting background processing (thumbnail and text extraction) for Book ID: {}", book.getId());
                 try {
-                    // Extract text
+                    
                     try (PDDocument document = Loader.loadPDF(finalPdfPath.toFile())) {
                         org.apache.pdfbox.text.PDFTextStripper stripper = new org.apache.pdfbox.text.PDFTextStripper();
                         String content = stripper.getText(document);
@@ -153,7 +153,7 @@ public class BookService {
                         book.setContent("");
                     }
                     
-                    // Generate thumbnail if not provided
+                    
                     if (generateThumb) {
                         String generatedThumbnailFileName = generateThumbnailFromPdf(finalPdfPath, finalThumbnailsPath);
                         Path generatedThumbnailPath = finalThumbnailsPath.resolve(generatedThumbnailFileName);
@@ -161,7 +161,7 @@ public class BookService {
                         log.debug("Successfully generated thumbnail for Book ID: {}", book.getId());
                     }
 
-                    // Save the updated book to persist content and trigger Hibernate Search (Lucene) indexing
+                    
                     log.info("Saving book with extracted content to trigger Lucene index for Book ID: {}", book.getId());
                     bookRepository.save(book);
                     log.info("Background processing and Lucene indexing completed for Book ID: {}", book.getId());
@@ -187,7 +187,7 @@ public class BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
         
-        // Add auth/entitlement checks here if needed
+        
         return Paths.get(book.getPdfFilePath());
     }
 
@@ -243,7 +243,7 @@ public class BookService {
     public void incrementViews(Long bookId) {
         String username = SecurityUtils.getCurrentUsername();
         if (username == null || username.equals("anonymousUser")) {
-            return; // Ignore unauthenticated views or handle differently
+            return; 
         }
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
@@ -315,7 +315,7 @@ public class BookService {
         try {
             Files.deleteIfExists(path);
         } catch (IOException ignored) {
-            // Best-effort cleanup; original exception will be surfaced.
+            
         }
     }
 }

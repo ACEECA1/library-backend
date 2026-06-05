@@ -117,8 +117,8 @@ public class RoleManagementService {
     }
 
     private void invalidateUserSessions(String username) {
-        // With stateless JWTs, role changes take effect upon token refresh or next login.
-        // Or if token revocation is added later, invalidate refresh tokens here.
+        
+        
     }
 
     private RoleResponseDTO mapToDTO(Role role) {

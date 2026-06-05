@@ -68,9 +68,9 @@ public class BadgeConsumer {
     }
 
     private void evaluateUpvoteBadges(User user) {
-        // Need to check if any comment has >= 10 upvotes
-        // Instead of fetching all comments, we can add a method or just do a simple check
-        // For simplicity, assuming a query exists or iterating. I'll add a method to CommentRepository.
+        
+        
+        
         boolean hasPopularComment = commentRepository.existsByUserIdAndUpvotesGreaterThanEqual(user.getId(), 10);
         awardBadgeIfApplicable(user, BadgeType.POPULAR_COMMENTER, hasPopularComment);
     }

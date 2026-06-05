@@ -8,6 +8,6 @@ public class CommentRequestDTO {
     @NotBlank(message = "Comment text cannot be empty")
     private String text;
 
-    private Long parentCommentId; // null if it's a root comment
+    private Long parentCommentId; 
     private boolean isDraft = false;
 }

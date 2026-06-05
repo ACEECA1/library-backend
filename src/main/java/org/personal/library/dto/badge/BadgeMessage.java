@@ -10,6 +10,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BadgeMessage implements Serializable {
-    private String actionType; // "UPLOAD", "REVIEW", "UPVOTE"
+    private String actionType; 
     private Long userId;
 }

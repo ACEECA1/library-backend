@@ -128,7 +128,7 @@ public class CommentService {
                 commentRepository.save(comment);
                 return;
             }
-            // changing from DOWN to UP
+            
             vote.setVoteType(CommentVote.VoteType.UP);
             comment.setDownvotes(comment.getDownvotes() - 1);
             comment.setUpvotes(comment.getUpvotes() + 1);
@@ -160,7 +160,7 @@ public class CommentService {
                 commentRepository.save(comment);
                 return;
             }
-            // changing from UP to DOWN
+            
             vote.setVoteType(CommentVote.VoteType.DOWN);
             comment.setUpvotes(comment.getUpvotes() - 1);
             comment.setDownvotes(comment.getDownvotes() + 1);

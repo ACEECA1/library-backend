@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "reviews", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "book_id"}) // 1 review per user per book
+        @UniqueConstraint(columnNames = {"user_id", "book_id"}) 
 })
 @Getter
 @Setter
@@ -28,7 +28,7 @@ public class Review {
     private Book book;
 
     @Column(nullable = false)
-    private int rating; // 1 to 5
+    private int rating; 
 
     @Column(length = 2000)
     private String text;
