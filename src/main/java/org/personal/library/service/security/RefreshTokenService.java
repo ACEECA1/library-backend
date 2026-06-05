@@ -28,9 +28,7 @@ public class RefreshTokenService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        refreshTokenRepository.deleteByUser(user);
-
-        RefreshToken refreshToken = new RefreshToken();
+        RefreshToken refreshToken = refreshTokenRepository.findByUser(user).orElse(new RefreshToken());
         refreshToken.setUser(user);
         refreshToken.setExpiryDate(Instant.now().plusMillis(appProperties.getJwt().getRefreshTokenExpirationMs()));
         refreshToken.setToken(UUID.randomUUID().toString());
