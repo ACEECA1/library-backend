@@ -52,7 +52,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"email\": \"test@example.com\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"Test\",\n  \"lastName\": \"User\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -87,7 +87,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"username\": \"testuser\",\n  \"password\": \"Password123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -121,7 +121,7 @@
           ]
         },
         {
-          "name": "[POST] refreshToken",
+          "name": "[POST] refresh",
           "request": {
             "method": "POST",
             "url": {
@@ -137,7 +137,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -186,7 +186,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -235,7 +235,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"oldPassword\": \"Password123!\",\n  \"newPassword\": \"NewPassword123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -267,7 +267,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"email\": \"test@example.com\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -299,7 +299,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"token\": \"reset-token\",\n  \"newPassword\": \"NewPassword123!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -465,7 +465,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"approved\": true,\n  \"comments\": \"Looks great!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -504,7 +504,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -564,7 +564,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"pageNumber\": 42,\n  \"note\": \"Interesting section!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -647,7 +647,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"content\": \"This is an awesome book!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -687,9 +687,9 @@
           }
         },
         {
-          "name": "[GET] Unknown",
+          "name": "[POST] createDraft",
           "request": {
-            "method": "GET",
+            "method": "POST",
             "url": {
               "raw": "{{baseUrl}}/api/books/{bookId}/comments/drafts",
               "host": [
@@ -708,7 +708,67 @@
                   "value": "1"
                 }
               ]
-            }
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Draft comment...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        {
+          "name": "[PUT] updateDraft",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{baseUrl}}/api/books/{bookId}/comments/drafts/{draftId}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "books",
+                "{bookId}",
+                "comments",
+                "drafts",
+                "{draftId}"
+              ],
+              "variable": [
+                {
+                  "key": "bookId",
+                  "value": "1"
+                },
+                {
+                  "key": "draftId",
+                  "value": "1"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Updated draft comment...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
           }
         },
         {
@@ -740,7 +800,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"content\": \"Updated comment content\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -814,7 +874,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -859,7 +919,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -897,7 +957,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"name\": \"Sci-Fi\",\n  \"description\": \"Science Fiction\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -930,7 +990,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"name\": \"Space\",\n  \"description\": \"Space exploration\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -963,7 +1023,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"name\": \"Isaac Asimov\",\n  \"description\": \"Author of Foundation\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -996,7 +1056,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"name\": \"Foundation\",\n  \"description\": \"Classic sci-fi series\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1056,7 +1116,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1088,7 +1148,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1132,7 +1192,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"currentPage\": 10,\n  \"isFinished\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1192,7 +1252,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"targetType\": \"COMMENT\",\n  \"targetId\": 1,\n  \"reason\": \"Spam\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1247,7 +1307,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1283,7 +1343,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Great book!\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1367,7 +1427,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"name\": \"ROLE_MODERATOR\",\n  \"permissions\": [\"READ_BOOKS\", \"MANAGE_COMMENTS\"]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1406,7 +1466,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"permissions\": [\"READ_BOOKS\", \"MANAGE_COMMENTS\", \"MANAGE_USERS\"]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1474,7 +1534,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"userId\": 1,\n  \"roleNames\": [\"ROLE_MODERATOR\"]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1507,7 +1567,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"roleName\": \"ROLE_MODERATOR\",\n  \"userIds\": [1, 2, 3]\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1570,7 +1630,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1603,7 +1663,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "[\n  1, 2, 3\n]",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1643,7 +1703,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1683,7 +1743,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{\n  \"minutes\": 60\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1743,7 +1803,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1784,7 +1844,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n\n}",
+              "raw": "{}",
               "options": {
                 "raw": {
                   "language": "json"
