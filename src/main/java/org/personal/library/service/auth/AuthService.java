@@ -8,6 +8,7 @@ import org.personal.library.dto.auth.UserResponseDTO;
 import org.personal.library.model.Permission;
 import org.personal.library.model.Role;
 import org.personal.library.model.User;
+import org.personal.library.service.notification.NotificationService;
 import org.personal.library.util.AppException;
 import org.personal.library.util.SecurityUtils;
 import org.springframework.http.HttpStatus;
@@ -32,6 +33,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final NotificationService notificationService;
 
     @Transactional
     public User registerUser(UserRegistrationDTO dto) {
@@ -47,7 +49,9 @@ public class AuthService {
         user.setDateOfBirth(dto.getDateOfBirth());
         user.setStatus(User.UserStatus.PENDING);
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        notificationService.notifyAdmins("New user registration pending approval: " + savedUser.getUsername());
+        return savedUser;
     }
 
     public UserResponseDTO login(LoginDTO dto, HttpServletRequest request) {
@@ -87,7 +91,7 @@ public class AuthService {
                 .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()))
                 .permissions(user.getRoles().stream()
                         .flatMap(r -> r.getPermissions().stream())
-                        .map(Permission::getName)
+                        .map(p -> p.getName().name())
                         .collect(Collectors.toSet()))
                 .build();
     }

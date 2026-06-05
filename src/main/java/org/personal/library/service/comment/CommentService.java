@@ -6,11 +6,14 @@ import org.personal.library.dao.CommentRepository;
 import org.personal.library.dao.UserRepository;
 import org.personal.library.dto.comment.CommentRequestDTO;
 import org.personal.library.dto.comment.CommentResponseDTO;
+import org.personal.library.dto.common.PaginatedResponse;
 import org.personal.library.model.Book;
 import org.personal.library.model.Comment;
 import org.personal.library.model.User;
 import org.personal.library.util.AppException;
 import org.personal.library.util.SecurityUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,15 +58,13 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentResponseDTO> getCommentsForBook(Long bookId) {
+    public PaginatedResponse<CommentResponseDTO> getCommentsForBook(Long bookId, Pageable pageable) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
 
-        // In a real app we'd likely have a method findByBookIdAndParentCommentIsNull
-        return commentRepository.findAll().stream()
-                .filter(c -> c.getBook().getId().equals(bookId) && c.getParentComment() == null)
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+        Page<CommentResponseDTO> page = commentRepository.findByBookIdAndParentCommentIsNull(book.getId(), pageable)
+                .map(this::mapToDTO);
+        return PaginatedResponse.from(page);
     }
 
     private CommentResponseDTO mapToDTO(Comment comment) {
@@ -79,5 +80,26 @@ public class CommentService {
                 .isDraft(comment.isDraft())
                 .replies(comment.getReplies().stream().map(this::mapToDTO).collect(Collectors.toList()))
                 .build();
+    }
+    @Transactional
+    public void deleteComment(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new AppException("Comment not found", HttpStatus.NOT_FOUND));
+
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) {
+            throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+
+        User user = userRepository.findByUsername(username).orElseThrow();
+        boolean isModerator = user.getRoles().stream()
+                .anyMatch(r -> r.getPermissions().stream()
+                        .anyMatch(p -> p.getName() == org.personal.library.model.PermissionType.MODERATE_COMMENTS));
+
+        if (!comment.getUser().getUsername().equals(username) && !isModerator) {
+            throw new AppException("You do not have permission to delete this comment", HttpStatus.FORBIDDEN);
+        }
+
+        commentRepository.delete(comment);
     }
 }

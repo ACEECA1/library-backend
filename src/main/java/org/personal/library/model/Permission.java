@@ -2,6 +2,8 @@ package org.personal.library.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,8 +20,9 @@ import java.util.Set;
 @AllArgsConstructor
 public class Permission extends BaseEntity {
 
+    @Enumerated(EnumType.STRING)
     @Column(unique = true, nullable = false)
-    private String name;
+    private PermissionType name;
 
     @ManyToMany(mappedBy = "permissions")
     private Set<Role> roles = new HashSet<>();

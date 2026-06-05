@@ -5,10 +5,12 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
+import org.hibernate.search.engine.search.query.SearchResult;
 import org.personal.library.model.Book;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,14 +20,18 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
     private final EntityManager entityManager;
 
     @Override
-    public List<Book> searchBooks(String keyword) {
+    public Page<Book> searchBooks(String keyword, Pageable pageable) {
         SearchSession searchSession = Search.session(entityManager);
-        
-        return searchSession.search(Book.class)
+        int offset = (int) pageable.getOffset();
+        int limit = pageable.getPageSize();
+
+        SearchResult<Book> result = searchSession.search(Book.class)
                 .where(f -> f.match()
                         .fields("title", "description")
                         .matching(keyword)
                         .fuzzy())
-                .fetchHits(20);
+                .fetch(offset, limit);
+
+        return new PageImpl<>(result.hits(), pageable, result.total().hitCount());
     }
 }

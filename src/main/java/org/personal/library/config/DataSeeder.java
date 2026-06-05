@@ -36,12 +36,8 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void seedPermissionsAndRoles() {
-        List<String> permissionNames = Arrays.asList(
-                "UPLOAD_BOOK", "APPROVE_BOOK", "MODERATE_COMMENTS", "BAN_USER", "USER_APPROVAL"
-        );
-
         Set<Permission> allPermissions = new HashSet<>();
-        for (String pName : permissionNames) {
+        for (org.personal.library.model.PermissionType pName : org.personal.library.model.PermissionType.values()) {
             Permission permission = permissionRepository.findByName(pName).orElseGet(() -> {
                 Permission p = new Permission();
                 p.setName(pName);
@@ -66,9 +62,9 @@ public class DataSeeder implements CommandLineRunner {
         
         Set<Permission> modPermissions = new HashSet<>();
         for (Permission p : allPermissions) {
-            if (p.getName().equals("MODERATE_COMMENTS") || 
-                p.getName().equals("BAN_USER") || 
-                p.getName().equals("USER_APPROVAL")) {
+            if (p.getName() == org.personal.library.model.PermissionType.MODERATE_COMMENTS || 
+                p.getName() == org.personal.library.model.PermissionType.BAN_USER || 
+                p.getName() == org.personal.library.model.PermissionType.USER_APPROVAL) {
                 modPermissions.add(p);
             }
         }

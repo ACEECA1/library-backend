@@ -6,7 +6,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+import org.personal.library.model.PermissionType;
+
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, Long> {
-    Optional<Permission> findByName(String name);
+    Optional<Permission> findByName(PermissionType name);
 }

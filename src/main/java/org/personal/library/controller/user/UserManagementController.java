@@ -3,9 +3,13 @@ package org.personal.library.controller.user;
 import lombok.RequiredArgsConstructor;
 import org.personal.library.dto.auth.UserResponseDTO;
 import org.personal.library.dto.common.ApiResponse;
+import org.personal.library.dto.common.PaginatedResponse;
 import org.personal.library.service.user.UserManagementService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,9 +23,9 @@ public class UserManagementController {
 
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('USER_APPROVAL')")
-    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getPendingUsers() {
-        List<UserResponseDTO> users = userManagementService.getPendingUsers();
-        return ResponseEntity.ok(ApiResponse.success(users));
+    public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getPendingUsers(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(userManagementService.getPendingUsers(pageable)));
     }
 
     @PostMapping("/{id}/approve")

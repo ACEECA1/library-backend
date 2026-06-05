@@ -1,0 +1,14 @@
+package org.personal.library.dto.role;
+
+import jakarta.validation.constraints.NotEmpty;
+import lombok.Data;
+
+import java.util.Set;
+
+@Data
+public class AssignRolesRequestDTO {
+    private Long userId;
+
+    @NotEmpty(message = "At least one role is required")
+    private Set<String> roleNames;
+}

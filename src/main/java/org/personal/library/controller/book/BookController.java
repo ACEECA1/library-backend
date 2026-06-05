@@ -2,6 +2,7 @@ package org.personal.library.controller.book;
 
 import lombok.RequiredArgsConstructor;
 import org.personal.library.dto.common.ApiResponse;
+import org.personal.library.dto.common.PaginatedResponse;
 import org.personal.library.service.book.BookService;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -9,6 +10,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,19 +58,23 @@ public class BookController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<java.util.List<org.personal.library.dto.book.BookResponseDTO>>> getAllLiveBooks() {
-        return ResponseEntity.ok(ApiResponse.success(bookService.getAllLiveBooks()));
+    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> getAllLiveBooks(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(bookService.getAllLiveBooks(pageable)));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<java.util.List<org.personal.library.dto.book.BookResponseDTO>>> searchBooks(@RequestParam("q") String keyword) {
-        return ResponseEntity.ok(ApiResponse.success(bookService.searchBooks(keyword)));
+    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> searchBooks(
+            @RequestParam("q") String keyword,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(bookService.searchBooks(keyword, pageable)));
     }
 
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('APPROVE_BOOK')")
-    public ResponseEntity<ApiResponse<java.util.List<org.personal.library.dto.book.BookResponseDTO>>> getPendingBooks() {
-        return ResponseEntity.ok(ApiResponse.success(bookService.getPendingBooks()));
+    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> getPendingBooks(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(bookService.getPendingBooks(pageable)));
     }
 
     @PostMapping("/{id}/approve")
@@ -74,5 +82,18 @@ public class BookController {
     public ResponseEntity<ApiResponse<Void>> approveBook(@PathVariable Long id) {
         bookService.approveBook(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Book approved successfully"));
+    }
+
+    @PostMapping("/{id}/view")
+    public ResponseEntity<ApiResponse<Void>> incrementView(@PathVariable Long id) {
+        bookService.incrementViews(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "View incremented"));
+    }
+
+    @GetMapping("/{id}/related")
+    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> getRelatedBooks(
+            @PathVariable Long id,
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(bookService.getRelatedBooks(id, pageable)));
     }
 }
