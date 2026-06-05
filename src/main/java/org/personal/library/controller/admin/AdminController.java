@@ -2,7 +2,6 @@ package org.personal.library.controller.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.personal.library.dao.AuditLogRepository;
-import org.personal.library.model.AuditLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;

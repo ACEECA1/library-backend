@@ -1,13 +1,11 @@
 package org.personal.library.service.security;
 
 import org.personal.library.util.AppException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import xyz.capybara.clamav.ClamavClient;
 import xyz.capybara.clamav.commands.scan.result.ScanResult;
 
-import java.io.InputStream;
 import java.nio.file.Path;
 
 import lombok.RequiredArgsConstructor;

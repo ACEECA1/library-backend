@@ -15,7 +15,6 @@ import org.personal.library.service.notification.NotificationService;
 import org.personal.library.service.security.VirusScanService;
 import org.personal.library.util.AppException;
 import org.personal.library.util.SecurityUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;

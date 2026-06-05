@@ -10,7 +10,6 @@ import org.personal.library.dao.UserBadgeRepository;
 import org.personal.library.dao.UserRepository;
 import org.personal.library.dto.badge.BadgeMessage;
 import org.personal.library.model.BadgeType;
-import org.personal.library.model.Comment;
 import org.personal.library.model.User;
 import org.personal.library.model.UserBadge;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

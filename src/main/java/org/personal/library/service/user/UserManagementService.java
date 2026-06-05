@@ -7,7 +7,6 @@ import org.personal.library.dto.auth.PasswordResetRequestResponseDTO;
 import org.personal.library.dto.auth.UserResponseDTO;
 import org.personal.library.dto.common.PaginatedResponse;
 import org.personal.library.model.PasswordResetRequest;
-import org.personal.library.model.Permission;
 import org.personal.library.model.Role;
 import org.personal.library.model.User;
 import org.personal.library.service.audit.AuditLogService;
@@ -19,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
