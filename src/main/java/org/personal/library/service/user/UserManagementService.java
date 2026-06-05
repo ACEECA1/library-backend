@@ -1,13 +1,17 @@
 package org.personal.library.service.user;
 
 import lombok.RequiredArgsConstructor;
+import org.personal.library.dao.PasswordResetRequestRepository;
 import org.personal.library.dao.UserRepository;
+import org.personal.library.dto.auth.PasswordResetRequestResponseDTO;
 import org.personal.library.dto.auth.UserResponseDTO;
 import org.personal.library.dto.common.PaginatedResponse;
+import org.personal.library.model.PasswordResetRequest;
 import org.personal.library.model.Permission;
 import org.personal.library.model.Role;
 import org.personal.library.model.User;
 import org.personal.library.service.audit.AuditLogService;
+import org.personal.library.service.security.RefreshTokenService;
 import org.personal.library.util.AppException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,19 +20,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
-import org.springframework.security.core.session.SessionInformation;
-import org.springframework.security.core.session.SessionRegistry;
-import org.springframework.security.core.userdetails.UserDetails;
 
 @Service
 @RequiredArgsConstructor
 public class UserManagementService {
 
     private final UserRepository userRepository;
+    private final PasswordResetRequestRepository passwordResetRequestRepository;
     private final AuditLogService auditLogService;
-    private final SessionRegistry sessionRegistry;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional(readOnly = true)
     public PaginatedResponse<UserResponseDTO> getPendingUsers(Pageable pageable) {
@@ -60,7 +62,7 @@ public class UserManagementService {
         user.setStatus(User.UserStatus.BANNED);
         userRepository.save(user);
 
-        invalidateUserSessions(user.getUsername());
+        refreshTokenService.deleteByUserId(userId);
 
         auditLogService.logAction("BAN_USER", "Banned user ID: " + userId);
     }
@@ -73,21 +75,57 @@ public class UserManagementService {
         user.setBannedUntil(java.time.LocalDateTime.now().plusMinutes(minutes));
         userRepository.save(user);
 
-        invalidateUserSessions(user.getUsername());
+        refreshTokenService.deleteByUserId(userId);
 
         auditLogService.logAction("TIMEOUT_USER", "Timed out user ID: " + userId + " for " + minutes + " minutes");
     }
 
-    private void invalidateUserSessions(String username) {
-        for (Object principal : sessionRegistry.getAllPrincipals()) {
-            if (principal instanceof UserDetails userDetails) {
-                if (userDetails.getUsername().equals(username)) {
-                    for (SessionInformation session : sessionRegistry.getAllSessions(principal, false)) {
-                        session.expireNow();
-                    }
-                }
-            }
+    @Transactional(readOnly = true)
+    public PaginatedResponse<PasswordResetRequestResponseDTO> getPendingPasswordResets(Pageable pageable) {
+        Page<PasswordResetRequestResponseDTO> page = passwordResetRequestRepository
+                .findByStatus(PasswordResetRequest.ResetStatus.PENDING, pageable)
+                .map(req -> PasswordResetRequestResponseDTO.builder()
+                        .id(req.getId())
+                        .username(req.getUser().getUsername())
+                        .status(req.getStatus())
+                        .createdAt(req.getCreatedAt())
+                        .build());
+        return PaginatedResponse.from(page);
+    }
+
+    @Transactional
+    public String approvePasswordReset(Long requestId) {
+        PasswordResetRequest request = passwordResetRequestRepository.findById(requestId)
+                .orElseThrow(() -> new AppException("Password reset request not found", HttpStatus.NOT_FOUND));
+
+        if (request.getStatus() != PasswordResetRequest.ResetStatus.PENDING) {
+            throw new AppException("Request is not PENDING", HttpStatus.BAD_REQUEST);
         }
+
+        request.setStatus(PasswordResetRequest.ResetStatus.APPROVED);
+        String token = UUID.randomUUID().toString();
+        request.setResetToken(token);
+        
+        passwordResetRequestRepository.save(request);
+        auditLogService.logAction("APPROVE_PASSWORD_RESET", "Approved password reset for user ID: " + request.getUser().getId());
+        
+        // Normally this token is sent via email, but for an intranet application without email,
+        // we can return it directly to the admin to give to the user manually, or via a notification.
+        return token;
+    }
+
+    @Transactional
+    public void rejectPasswordReset(Long requestId) {
+        PasswordResetRequest request = passwordResetRequestRepository.findById(requestId)
+                .orElseThrow(() -> new AppException("Password reset request not found", HttpStatus.NOT_FOUND));
+
+        if (request.getStatus() != PasswordResetRequest.ResetStatus.PENDING) {
+            throw new AppException("Request is not PENDING", HttpStatus.BAD_REQUEST);
+        }
+
+        request.setStatus(PasswordResetRequest.ResetStatus.REJECTED);
+        passwordResetRequestRepository.save(request);
+        auditLogService.logAction("REJECT_PASSWORD_RESET", "Rejected password reset for user ID: " + request.getUser().getId());
     }
 
     private UserResponseDTO mapToDTO(User user) {

@@ -1,28 +1,28 @@
 package org.personal.library.service.auth;
 
 import lombok.RequiredArgsConstructor;
+import org.personal.library.dao.PasswordResetRequestRepository;
 import org.personal.library.dao.UserRepository;
-import org.personal.library.dto.auth.LoginDTO;
-import org.personal.library.dto.auth.UserRegistrationDTO;
-import org.personal.library.dto.auth.UserResponseDTO;
+import org.personal.library.dto.auth.*;
+import org.personal.library.model.PasswordResetRequest;
+import org.personal.library.model.RefreshToken;
 import org.personal.library.model.Role;
 import org.personal.library.model.User;
+import org.personal.library.security.JwtUtils;
 import org.personal.library.service.notification.NotificationService;
+import org.personal.library.service.security.RefreshTokenService;
 import org.personal.library.util.AppException;
 import org.personal.library.util.SecurityUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,9 +30,12 @@ import java.util.stream.Collectors;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final PasswordResetRequestRepository passwordResetRequestRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final NotificationService notificationService;
+    private final JwtUtils jwtUtils;
+    private final RefreshTokenService refreshTokenService;
 
     @Transactional
     public User registerUser(UserRegistrationDTO dto) {
@@ -53,17 +56,97 @@ public class AuthService {
         return savedUser;
     }
 
-    public UserResponseDTO login(LoginDTO dto, HttpServletRequest request) {
+    @Transactional
+    public JwtResponseDTO login(LoginDTO dto) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
         );
-        
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(authentication);
-        HttpSession session = request.getSession(true);
-        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, securityContext);
 
-        return getCurrentUser();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        String jwt = jwtUtils.generateAccessToken(authentication);
+        
+        User user = userRepository.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user.getId());
+
+        return JwtResponseDTO.builder()
+                .accessToken(jwt)
+                .refreshToken(refreshToken.getToken())
+                .username(user.getUsername())
+                .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+                .build();
+    }
+
+    @Transactional
+    public JwtResponseDTO refreshToken(TokenRefreshRequestDTO request) {
+        return refreshTokenService.findByToken(request.getRefreshToken())
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String token = jwtUtils.generateAccessToken(user.getUsername());
+                    return JwtResponseDTO.builder()
+                            .accessToken(token)
+                            .refreshToken(request.getRefreshToken())
+                            .username(user.getUsername())
+                            .roles(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+                            .build();
+                })
+                .orElseThrow(() -> new AppException("Refresh token is not in database!", HttpStatus.FORBIDDEN));
+    }
+
+    @Transactional
+    public void logout(String username) {
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user != null) {
+            refreshTokenService.deleteByUserId(user.getId());
+        }
+    }
+
+    @Transactional
+    public void changePassword(ChangePasswordRequestDTO request) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) {
+            throw new AppException("Not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new AppException("Invalid old password", HttpStatus.BAD_REQUEST);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequestDTO request) {
+        User user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        PasswordResetRequest resetRequest = new PasswordResetRequest();
+        resetRequest.setUser(user);
+        resetRequest.setStatus(PasswordResetRequest.ResetStatus.PENDING);
+        
+        passwordResetRequestRepository.save(resetRequest);
+        notificationService.notifyAdmins("Password reset requested for user: " + user.getUsername());
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequestDTO request) {
+        PasswordResetRequest resetRequest = passwordResetRequestRepository.findByResetTokenAndStatus(
+                request.getResetToken(), PasswordResetRequest.ResetStatus.APPROVED)
+                .orElseThrow(() -> new AppException("Invalid or expired reset token", HttpStatus.BAD_REQUEST));
+
+        User user = resetRequest.getUser();
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        resetRequest.setStatus(PasswordResetRequest.ResetStatus.CONSUMED);
+        passwordResetRequestRepository.save(resetRequest);
     }
 
     @Transactional(readOnly = true)

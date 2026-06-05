@@ -55,4 +55,25 @@ public class UserManagementController {
         userManagementService.timeoutUser(id, request.getMinutes());
         return ResponseEntity.ok(ApiResponse.success(null, "User timed out successfully"));
     }
+
+    @GetMapping("/password-resets/pending")
+    @PreAuthorize("hasAuthority('USER_APPROVAL')")
+    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.auth.PasswordResetRequestResponseDTO>>> getPendingPasswordResets(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(userManagementService.getPendingPasswordResets(pageable)));
+    }
+
+    @PostMapping("/password-resets/{id}/approve")
+    @PreAuthorize("hasAuthority('USER_APPROVAL')")
+    public ResponseEntity<ApiResponse<String>> approvePasswordReset(@PathVariable Long id) {
+        String token = userManagementService.approvePasswordReset(id);
+        return ResponseEntity.ok(ApiResponse.success(token, "Password reset approved. Give this token to the user."));
+    }
+
+    @PostMapping("/password-resets/{id}/reject")
+    @PreAuthorize("hasAuthority('USER_APPROVAL')")
+    public ResponseEntity<ApiResponse<Void>> rejectPasswordReset(@PathVariable Long id) {
+        userManagementService.rejectPasswordReset(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Password reset rejected"));
+    }
 }

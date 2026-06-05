@@ -1,13 +1,11 @@
 package org.personal.library.controller.auth;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.personal.library.dto.auth.LoginDTO;
-import org.personal.library.dto.auth.UserRegistrationDTO;
-import org.personal.library.dto.auth.UserResponseDTO;
+import org.personal.library.dto.auth.*;
 import org.personal.library.dto.common.ApiResponse;
 import org.personal.library.service.auth.AuthService;
+import org.personal.library.util.SecurityUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,13 +25,46 @@ public class AuthController {
     }
     
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<UserResponseDTO>> login(@Valid @RequestBody LoginDTO loginDTO, HttpServletRequest request) {
-        UserResponseDTO user = authService.login(loginDTO, request);
-        return ResponseEntity.ok(ApiResponse.success(user, "Login successful"));
+    public ResponseEntity<ApiResponse<JwtResponseDTO>> login(@Valid @RequestBody LoginDTO loginDTO) {
+        JwtResponseDTO response = authService.login(loginDTO);
+        return ResponseEntity.ok(ApiResponse.success(response, "Login successful"));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<JwtResponseDTO>> refreshToken(@Valid @RequestBody TokenRefreshRequestDTO request) {
+        JwtResponseDTO response = authService.refreshToken(request);
+        return ResponseEntity.ok(ApiResponse.success(response, "Token refreshed successfully"));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout() {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username != null) {
+            authService.logout(username);
+        }
+        return ResponseEntity.ok(ApiResponse.success(null, "Logout successful"));
     }
 
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<UserResponseDTO>> getCurrentUser() {
         return ResponseEntity.ok(ApiResponse.success(authService.getCurrentUser()));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(@Valid @RequestBody ChangePasswordRequestDTO request) {
+        authService.changePassword(request);
+        return ResponseEntity.ok(ApiResponse.success(null, "Password changed successfully"));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequestDTO request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(ApiResponse.success(null, "Password reset requested successfully. Please wait for admin approval."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequestDTO request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success(null, "Password reset successfully. You may now login."));
     }
 }
