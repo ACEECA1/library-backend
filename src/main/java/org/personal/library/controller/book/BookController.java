@@ -26,7 +26,7 @@ public class BookController {
 
     private final BookService bookService;
 
-    @PostMapping("/upload")
+    @PostMapping(consumes = {"multipart/form-data"})
     @PreAuthorize("hasAuthority('UPLOAD_BOOK')")
     public ResponseEntity<ApiResponse<Void>> uploadBook(
             @RequestParam("title") String title,
