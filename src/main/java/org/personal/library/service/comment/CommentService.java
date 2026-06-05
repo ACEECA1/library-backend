@@ -28,6 +28,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final org.personal.library.service.audit.AuditLogService auditLogService;
+    private final org.personal.library.service.notification.NotificationService notificationService;
 
     @Transactional
     public void addComment(Long bookId, CommentRequestDTO dto) {
@@ -55,32 +57,53 @@ public class CommentService {
         }
 
         commentRepository.save(comment);
+        
+        if (!comment.isDraft()) {
+            auditLogService.logAction("ADD_COMMENT", "Added comment to book ID: " + bookId);
+            if (!user.getId().equals(book.getUploader().getId()) && book.getUploader() != null) {
+                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle());
+            }
+        }
     }
 
     @Transactional(readOnly = true)
     public PaginatedResponse<CommentResponseDTO> getCommentsForBook(Long bookId, Pageable pageable) {
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
-
-        Page<CommentResponseDTO> page = commentRepository.findByBookIdAndParentCommentIsNull(book.getId(), pageable)
+        Page<CommentResponseDTO> page = commentRepository.findByBookIdAndParentCommentIsNullAndIsDraftFalse(bookId, pageable)
                 .map(this::mapToDTO);
         return PaginatedResponse.from(page);
+    }
+
+    @Transactional
+    public void upvoteComment(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new AppException("Comment not found", HttpStatus.NOT_FOUND));
+        comment.setUpvotes(comment.getUpvotes() + 1);
+        commentRepository.save(comment);
+    }
+
+    @Transactional
+    public void downvoteComment(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new AppException("Comment not found", HttpStatus.NOT_FOUND));
+        comment.setDownvotes(comment.getDownvotes() + 1);
+        commentRepository.save(comment);
     }
 
     private CommentResponseDTO mapToDTO(Comment comment) {
         return CommentResponseDTO.builder()
                 .id(comment.getId())
                 .text(comment.getText())
+                .username(comment.getUser().getUsername())
+                .createdAt(comment.getCreatedAt())
                 .upvotes(comment.getUpvotes())
                 .downvotes(comment.getDownvotes())
-                .username(comment.getUser().getUsername())
                 .bookId(comment.getBook().getId())
                 .parentCommentId(comment.getParentComment() != null ? comment.getParentComment().getId() : null)
-                .createdAt(comment.getCreatedAt())
                 .isDraft(comment.isDraft())
-                .replies(comment.getReplies().stream().map(this::mapToDTO).collect(Collectors.toList()))
+                .replies(comment.getReplies().stream().filter(c -> !c.isDraft()).map(this::mapToDTO).collect(Collectors.toList()))
                 .build();
     }
+
     @Transactional
     public void deleteComment(Long commentId) {
         Comment comment = commentRepository.findById(commentId)

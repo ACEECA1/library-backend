@@ -37,11 +37,14 @@ public class CustomUserDetailsService implements UserDetailsService {
             }
         }
 
+        boolean isAccountLocked = user.getStatus() == User.UserStatus.BANNED 
+                || (user.getBannedUntil() != null && user.getBannedUntil().isAfter(java.time.LocalDateTime.now()));
+
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .disabled(user.getStatus() == User.UserStatus.PENDING)
-                .accountLocked(user.getStatus() == User.UserStatus.BANNED)
+                .accountLocked(isAccountLocked)
                 .authorities(authorities)
                 .build();
     }

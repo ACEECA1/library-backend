@@ -9,5 +9,5 @@ public class CommentRequestDTO {
     private String text;
 
     private Long parentCommentId; // null if it's a root comment
-    private boolean isDraft;
+    private boolean isDraft = false;
 }

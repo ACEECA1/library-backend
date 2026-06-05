@@ -65,6 +65,19 @@ public class UserManagementService {
         auditLogService.logAction("BAN_USER", "Banned user ID: " + userId);
     }
 
+    @Transactional
+    public void timeoutUser(Long userId, int minutes) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        user.setBannedUntil(java.time.LocalDateTime.now().plusMinutes(minutes));
+        userRepository.save(user);
+
+        invalidateUserSessions(user.getUsername());
+
+        auditLogService.logAction("TIMEOUT_USER", "Timed out user ID: " + userId + " for " + minutes + " minutes");
+    }
+
     private void invalidateUserSessions(String username) {
         for (Object principal : sessionRegistry.getAllPrincipals()) {
             if (principal instanceof UserDetails userDetails) {

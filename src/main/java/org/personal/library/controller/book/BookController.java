@@ -32,9 +32,13 @@ public class BookController {
             @RequestParam("title") String title,
             @RequestParam(value = "description", required = false) String description,
             @RequestParam("pdfFile") MultipartFile pdfFile,
-            @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile) {
+            @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
+            @RequestParam(value = "categoryIds", required = false) java.util.List<Long> categoryIds,
+            @RequestParam(value = "tagIds", required = false) java.util.List<Long> tagIds,
+            @RequestParam(value = "authorIds", required = false) java.util.List<Long> authorIds,
+            @RequestParam(value = "seriesId", required = false) Long seriesId) {
         
-        bookService.uploadBook(title, description, pdfFile, thumbnailFile);
+        bookService.uploadBook(title, description, pdfFile, thumbnailFile, categoryIds, tagIds, authorIds, seriesId);
         return ResponseEntity.ok(ApiResponse.success(null, "Book uploaded successfully"));
     }
 

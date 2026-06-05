@@ -39,4 +39,16 @@ public class CommentController {
         commentService.deleteComment(commentId);
         return ResponseEntity.ok(ApiResponse.success(null, "Comment deleted successfully"));
     }
+
+    @PostMapping("/{commentId}/upvote")
+    public ResponseEntity<ApiResponse<Void>> upvoteComment(@PathVariable Long bookId, @PathVariable Long commentId) {
+        commentService.upvoteComment(commentId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Comment upvoted"));
+    }
+
+    @PostMapping("/{commentId}/downvote")
+    public ResponseEntity<ApiResponse<Void>> downvoteComment(@PathVariable Long bookId, @PathVariable Long commentId) {
+        commentService.downvoteComment(commentId);
+        return ResponseEntity.ok(ApiResponse.success(null, "Comment downvoted"));
+    }
 }

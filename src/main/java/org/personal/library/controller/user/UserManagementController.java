@@ -50,4 +50,11 @@ public class UserManagementController {
         userManagementService.banUser(id);
         return ResponseEntity.ok(ApiResponse.success(null, "User banned successfully"));
     }
+
+    @PostMapping("/{id}/timeout")
+    @PreAuthorize("hasAuthority('BAN_USER')")
+    public ResponseEntity<ApiResponse<Void>> timeoutUser(@PathVariable Long id, @RequestBody org.personal.library.dto.user.TimeoutRequestDTO request) {
+        userManagementService.timeoutUser(id, request.getMinutes());
+        return ResponseEntity.ok(ApiResponse.success(null, "User timed out successfully"));
+    }
 }

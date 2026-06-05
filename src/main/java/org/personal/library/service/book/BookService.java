@@ -41,6 +41,10 @@ public class BookService {
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
     private final VirusScanService virusScanService;
+    private final org.personal.library.dao.CategoryRepository categoryRepository;
+    private final org.personal.library.dao.TagRepository tagRepository;
+    private final org.personal.library.dao.AuthorRepository authorRepository;
+    private final org.personal.library.dao.SeriesRepository seriesRepository;
 
     @Value("${app.storage.books:storage/books}")
     private String booksStoragePath;
@@ -49,7 +53,8 @@ public class BookService {
     private String thumbnailsStoragePath;
 
     @Transactional
-    public void uploadBook(String title, String description, MultipartFile pdfFile, MultipartFile thumbnailFile) {
+    public void uploadBook(String title, String description, MultipartFile pdfFile, MultipartFile thumbnailFile,
+                           List<Long> categoryIds, List<Long> tagIds, List<Long> authorIds, Long seriesId) {
         String username = SecurityUtils.getCurrentUsername();
         if (username == null) {
             throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
@@ -100,6 +105,19 @@ public class BookService {
             book.setPdfFilePath(pdfPath.toString());
             book.setThumbnailPath(thumbnailFileName != null ? thumbnailPath.toString() : null);
             book.setUploader(uploader);
+
+            if (categoryIds != null && !categoryIds.isEmpty()) {
+                book.setCategories(new java.util.HashSet<>(categoryRepository.findAllById(categoryIds)));
+            }
+            if (tagIds != null && !tagIds.isEmpty()) {
+                book.setTags(new java.util.HashSet<>(tagRepository.findAllById(tagIds)));
+            }
+            if (authorIds != null && !authorIds.isEmpty()) {
+                book.setAuthors(new java.util.HashSet<>(authorRepository.findAllById(authorIds)));
+            }
+            if (seriesId != null) {
+                book.setSeries(seriesRepository.findById(seriesId).orElse(null));
+            }
 
             // If user is ADMIN, go LIVE directly, else PENDING
             boolean isAdmin = uploader.getRoles().stream().anyMatch(r -> r.getName().equals("ADMIN"));
