@@ -27,7 +27,7 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
 
         SearchResult<Book> result = searchSession.search(Book.class)
                 .where(f -> f.match()
-                        .fields("title", "description")
+                        .fields("title", "description", "content")
                         .matching(keyword)
                         .fuzzy())
                 .fetch(offset, limit);

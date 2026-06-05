@@ -106,6 +106,15 @@ public class BookService {
             book.setThumbnailPath(thumbnailFileName != null ? thumbnailPath.toString() : null);
             book.setUploader(uploader);
 
+            try (PDDocument document = Loader.loadPDF(pdfPath.toFile())) {
+                org.apache.pdfbox.text.PDFTextStripper stripper = new org.apache.pdfbox.text.PDFTextStripper();
+                String content = stripper.getText(document);
+                book.setContent(content);
+            } catch (IOException e) {
+                // If text extraction fails, we still save the book but without content text
+                book.setContent("");
+            }
+
             if (categoryIds != null && !categoryIds.isEmpty()) {
                 book.setCategories(new java.util.HashSet<>(categoryRepository.findAllById(categoryIds)));
             }

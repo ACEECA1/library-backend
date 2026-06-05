@@ -27,15 +27,29 @@ public class Book extends BaseEntity {
     @FullTextField
     private String description;
 
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
+    @FullTextField
+    private String content;
+
     @Column(nullable = false)
     private String pdfFilePath;
 
+    @Column
     private String thumbnailPath;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private BookStatus status = BookStatus.PENDING;
 
+    @Column(nullable = false)
     private long views = 0;
+
+    @Column(nullable = false)
+    private double averageRating = 0.0;
+
+    @Column(nullable = false)
+    private int reviewCount = 0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "uploader_id")
