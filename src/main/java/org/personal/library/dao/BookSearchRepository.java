@@ -7,4 +7,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface BookSearchRepository {
     Page<Book> searchBooks(String keyword, Pageable pageable);
+    Page<Book> advancedSearch(String keyword, String category, String series, String sortBy, Pageable pageable);
 }

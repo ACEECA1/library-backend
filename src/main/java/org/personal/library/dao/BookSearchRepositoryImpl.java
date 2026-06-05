@@ -41,4 +41,43 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
 
         return new PageImpl<>(result.hits(), pageable, result.total().hitCount());
     }
+
+    @Override
+    public Page<Book> advancedSearch(String keyword, String category, String series, String sortBy, Pageable pageable) {
+        SearchSession searchSession = Search.session(entityManager);
+        int offset = (int) pageable.getOffset();
+        int limit = pageable.getPageSize();
+
+        SearchResult<Book> result = searchSession.search(Book.class)
+                .where(f -> f.bool(b -> {
+                    b.filter(f.match().field("status").matching(Book.BookStatus.LIVE));
+                    
+                    if (keyword != null && !keyword.trim().isEmpty()) {
+                        b.must(f.match()
+                                .fields("title", "description", "content", "author")
+                                .matching(keyword)
+                                .fuzzy());
+                    } else {
+                        b.must(f.matchAll());
+                    }
+
+                    if (category != null && !category.trim().isEmpty()) {
+                        b.filter(f.match().field("categories.name").matching(category));
+                    }
+                    if (series != null && !series.trim().isEmpty()) {
+                        b.filter(f.match().field("series.name").matching(series));
+                    }
+                }))
+                .sort(f -> {
+                    if ("views".equalsIgnoreCase(sortBy)) {
+                        return f.field("views").desc();
+                    } else if ("rating".equalsIgnoreCase(sortBy)) {
+                        return f.field("averageRating").desc();
+                    }
+                    return f.score();
+                })
+                .fetch(offset, limit);
+
+        return new PageImpl<>(result.hits(), pageable, result.total().hitCount());
+    }
 }

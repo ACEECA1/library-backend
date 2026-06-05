@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     Page<Comment> findByBookIdAndParentCommentIsNull(Long bookId, Pageable pageable);
+    boolean existsByUserIdAndUpvotesGreaterThanEqual(Long userId, int upvotes);
     Page<Comment> findByBookIdAndParentCommentIsNullAndIsDraftFalse(Long bookId, Pageable pageable);
     java.util.List<Comment> findByBookIdAndUserIdAndIsDraftTrue(Long bookId, Long userId);
 }

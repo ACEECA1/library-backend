@@ -11,6 +11,8 @@ import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+
 @Entity
 @Getter
 @Setter
@@ -19,6 +21,7 @@ import java.util.Set;
 public class Category extends BaseEntity {
 
     @Column(unique = true, nullable = false)
+    @KeywordField
     private String name;
 
     @ManyToMany(mappedBy = "categories")

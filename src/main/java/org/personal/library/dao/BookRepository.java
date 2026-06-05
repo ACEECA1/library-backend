@@ -20,4 +20,6 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookSearchRep
 
     @Query("SELECT COUNT(r) FROM Review r WHERE r.book.id = :bookId")
     Long getReviewCountForBook(Long bookId);
+
+    long countByUploaderId(Long uploaderId);
 }

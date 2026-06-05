@@ -10,6 +10,7 @@ import org.personal.library.dto.review.ReviewResponseDTO;
 import org.personal.library.model.Book;
 import org.personal.library.model.Review;
 import org.personal.library.model.User;
+import org.personal.library.service.badge.BadgeProducer;
 import org.personal.library.util.AppException;
 import org.personal.library.util.SecurityUtils;
 import org.springframework.data.domain.Page;
@@ -25,6 +26,7 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
+    private final BadgeProducer badgeProducer;
 
     @Transactional
     public void addOrUpdateReview(ReviewRequestDTO dto) {
@@ -48,6 +50,8 @@ public class ReviewService {
         
         reviewRepository.save(review);
         updateBookRating(book);
+        
+        badgeProducer.publishEvent("REVIEW", user.getId());
     }
 
     @Transactional(readOnly = true)

@@ -10,6 +10,8 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+
 @Entity
 @Getter
 @Setter
@@ -17,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Series extends BaseEntity {
 
+    @KeywordField
     private String name;
     private String description;
 

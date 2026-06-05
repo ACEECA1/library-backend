@@ -11,6 +11,9 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyVa
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
+import org.hibernate.search.engine.backend.types.Sortable;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -52,9 +55,11 @@ public class Book extends BaseEntity {
     private BookStatus status = BookStatus.PENDING;
 
     @Column(nullable = false)
+    @GenericField(sortable = Sortable.YES)
     private long views = 0;
 
     @Column(nullable = false)
+    @GenericField(sortable = Sortable.YES)
     private double averageRating = 0.0;
 
     @Column(nullable = false)
@@ -70,6 +75,7 @@ public class Book extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "series_id")
+    @IndexedEmbedded
     private Series series;
 
     @ManyToMany
@@ -78,6 +84,7 @@ public class Book extends BaseEntity {
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
+    @IndexedEmbedded
     private Set<Category> categories = new HashSet<>();
 
     @ManyToMany

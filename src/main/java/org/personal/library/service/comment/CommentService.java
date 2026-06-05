@@ -12,6 +12,7 @@ import org.personal.library.model.Comment;
 import org.personal.library.model.CommentVote;
 import org.personal.library.model.User;
 import org.personal.library.dao.CommentVoteRepository;
+import org.personal.library.service.badge.BadgeProducer;
 import org.personal.library.util.AppException;
 import org.personal.library.util.SecurityUtils;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,7 @@ public class CommentService {
     private final CommentVoteRepository commentVoteRepository;
     private final org.personal.library.service.audit.AuditLogService auditLogService;
     private final org.personal.library.service.notification.NotificationService notificationService;
+    private final BadgeProducer badgeProducer;
 
     @Transactional
     public void addComment(Long bookId, CommentRequestDTO dto) {
@@ -131,6 +133,8 @@ public class CommentService {
         }
         commentVoteRepository.save(vote);
         commentRepository.save(comment);
+
+        badgeProducer.publishEvent("UPVOTE", comment.getUser().getId());
     }
 
     @Transactional

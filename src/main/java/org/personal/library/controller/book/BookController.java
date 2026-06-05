@@ -74,9 +74,12 @@ public class BookController {
 
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> searchBooks(
-            @RequestParam("q") String keyword,
+            @RequestParam(value = "q", required = false) String keyword,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "series", required = false) String series,
+            @RequestParam(value = "sortBy", required = false) String sortBy,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(bookService.searchBooks(keyword, pageable)));
+        return ResponseEntity.ok(ApiResponse.success(bookService.searchBooks(keyword, category, series, sortBy, pageable)));
     }
 
     @GetMapping("/pending")

@@ -10,6 +10,7 @@ import org.personal.library.dto.common.PaginatedResponse;
 import org.personal.library.model.Book;
 import org.personal.library.model.User;
 import org.personal.library.service.audit.AuditLogService;
+import org.personal.library.service.badge.BadgeProducer;
 import org.personal.library.service.notification.NotificationService;
 import org.personal.library.service.security.VirusScanService;
 import org.personal.library.util.AppException;
@@ -42,6 +43,7 @@ public class BookService {
     private final AuditLogService auditLogService;
     private final NotificationService notificationService;
     private final VirusScanService virusScanService;
+    private final BadgeProducer badgeProducer;
     private final org.personal.library.dao.CategoryRepository categoryRepository;
     private final org.personal.library.dao.TagRepository tagRepository;
     private final org.personal.library.dao.SeriesRepository seriesRepository;
@@ -123,6 +125,8 @@ public class BookService {
 
             bookRepository.save(book);
             auditLogService.logAction("UPLOAD_BOOK", "Uploaded book: " + book.getTitle());
+            badgeProducer.publishEvent("UPLOAD", uploader.getId());
+            
             notificationService.createForUser(uploader,
                     book.getStatus() == Book.BookStatus.PENDING
                             ? "Book upload submitted for approval: " + book.getTitle()
@@ -201,8 +205,8 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<org.personal.library.dto.book.BookResponseDTO> searchBooks(String keyword, Pageable pageable) {
-        Page<org.personal.library.dto.book.BookResponseDTO> page = bookRepository.searchBooks(keyword, pageable)
+    public PaginatedResponse<org.personal.library.dto.book.BookResponseDTO> searchBooks(String keyword, String category, String series, String sortBy, Pageable pageable) {
+        Page<org.personal.library.dto.book.BookResponseDTO> page = bookRepository.advancedSearch(keyword, category, series, sortBy, pageable)
                 .map(this::mapToDTO);
         return PaginatedResponse.from(page);
     }
