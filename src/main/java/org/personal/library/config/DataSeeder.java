@@ -61,9 +61,9 @@ public class DataSeeder implements CommandLineRunner {
         
         Set<Permission> modPermissions = new HashSet<>();
         for (Permission p : allPermissions) {
-            if (p.getName() == PermissionType.MODERATE_COMMENTS || 
+            if (p.getName() == PermissionType.MODERATE_COMMENT || 
                 p.getName() == PermissionType.BAN_USER || 
-                p.getName() == PermissionType.USER_APPROVAL) {
+                p.getName() == PermissionType.APPROVE_USER) {
                 modPermissions.add(p);
             }
         }

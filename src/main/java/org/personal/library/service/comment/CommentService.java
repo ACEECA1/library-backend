@@ -286,7 +286,7 @@ public class CommentService {
         User user = userRepository.findByUsername(username).orElseThrow();
         boolean isModerator = user.getRoles().stream()
                 .anyMatch(r -> r.getPermissions().stream()
-                        .anyMatch(p -> p.getName() == PermissionType.MODERATE_COMMENTS));
+                        .anyMatch(p -> p.getName() == PermissionType.MODERATE_COMMENT));
 
         if (!comment.getUser().getUsername().equals(username) && !isModerator) {
             throw new AppException("You do not have permission to delete this comment", HttpStatus.FORBIDDEN);

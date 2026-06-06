@@ -3,9 +3,10 @@ package org.personal.library.model;
 public enum PermissionType {
     UPLOAD_BOOK,
     APPROVE_BOOK,
-    MODERATE_COMMENTS,
+    MODERATE_COMMENT,
     BAN_USER,
-    USER_APPROVAL,
-    MANAGE_ROLES,
-    MANAGE_METADATA
+    APPROVE_USER,
+    MANAGE_ROLE,
+    MANAGE_METADATA,
+    VIEW_AUDIT_LOG
 }

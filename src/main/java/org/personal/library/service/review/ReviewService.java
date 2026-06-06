@@ -108,7 +108,7 @@ public class ReviewService {
             User currentUser = userRepository.findByUsername(username).orElseThrow();
             boolean hasModPermission = currentUser.getRoles().stream()
                     .flatMap(r -> r.getPermissions().stream())
-                    .anyMatch(p -> p.getName() == PermissionType.MODERATE_COMMENTS);
+                    .anyMatch(p -> p.getName() == PermissionType.MODERATE_COMMENT);
             if (!hasModPermission) {
                 throw new AppException("Unauthorized to delete this review", HttpStatus.FORBIDDEN);
             }

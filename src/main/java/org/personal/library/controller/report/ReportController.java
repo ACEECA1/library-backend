@@ -28,7 +28,7 @@ public class ReportController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('MODERATE_COMMENTS')")
+    @PreAuthorize("hasAuthority('MODERATE_COMMENT')")
     public ResponseEntity<ApiResponse<PaginatedResponse<ReportResponseDTO>>> getReports(
             @RequestParam(defaultValue = "false") boolean resolved,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -36,7 +36,7 @@ public class ReportController {
     }
 
     @PostMapping("/{id}/resolve")
-    @PreAuthorize("hasAuthority('MODERATE_COMMENTS')")
+    @PreAuthorize("hasAuthority('MODERATE_COMMENT')")
     public ResponseEntity<ApiResponse<Void>> resolveReport(@PathVariable Long id) {
         reportService.resolveReport(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Report resolved successfully"));

@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin/roles")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('MANAGE_ROLES')")
+@PreAuthorize("hasAuthority('MANAGE_ROLE')")
 public class RoleManagementController {
 
     private final RoleManagementService roleManagementService;

@@ -23,21 +23,21 @@ public class UserManagementController {
     private final UserManagementService userManagementService;
 
     @GetMapping("/pending")
-    @PreAuthorize("hasAuthority('USER_APPROVAL')")
+    @PreAuthorize("hasAuthority('APPROVE_USER')")
     public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getPendingUsers(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(userManagementService.getPendingUsers(pageable)));
     }
 
     @PostMapping("/{id}/approve")
-    @PreAuthorize("hasAuthority('USER_APPROVAL')")
+    @PreAuthorize("hasAuthority('APPROVE_USER')")
     public ResponseEntity<ApiResponse<Void>> approveUser(@PathVariable Long id) {
         userManagementService.approveUser(id);
         return ResponseEntity.ok(ApiResponse.success(null, "User approved successfully"));
     }
 
     @PostMapping("/approve-bulk")
-    @PreAuthorize("hasAuthority('USER_APPROVAL')")
+    @PreAuthorize("hasAuthority('APPROVE_USER')")
     public ResponseEntity<ApiResponse<Void>> approveUsersBulk(@RequestBody List<Long> ids) {
         for(Long id : ids) {
             userManagementService.approveUser(id);
@@ -60,21 +60,21 @@ public class UserManagementController {
     }
 
     @GetMapping("/password-resets/pending")
-    @PreAuthorize("hasAuthority('USER_APPROVAL')")
+    @PreAuthorize("hasAuthority('APPROVE_USER')")
     public ResponseEntity<ApiResponse<PaginatedResponse<PasswordResetRequestResponseDTO>>> getPendingPasswordResets(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(userManagementService.getPendingPasswordResets(pageable)));
     }
 
     @PostMapping("/password-resets/{id}/approve")
-    @PreAuthorize("hasAuthority('USER_APPROVAL')")
+    @PreAuthorize("hasAuthority('APPROVE_USER')")
     public ResponseEntity<ApiResponse<String>> approvePasswordReset(@PathVariable Long id) {
         String token = userManagementService.approvePasswordReset(id);
         return ResponseEntity.ok(ApiResponse.success(token, "Password reset approved. Give this token to the user."));
     }
 
     @PostMapping("/password-resets/{id}/reject")
-    @PreAuthorize("hasAuthority('USER_APPROVAL')")
+    @PreAuthorize("hasAuthority('APPROVE_USER')")
     public ResponseEntity<ApiResponse<Void>> rejectPasswordReset(@PathVariable Long id) {
         userManagementService.rejectPasswordReset(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Password reset rejected"));
