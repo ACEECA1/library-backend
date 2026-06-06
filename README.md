@@ -32,7 +32,7 @@ A robust, enterprise-grade RESTful API backend for managing a digital library of
 
 ## Tech Stack
 - **Framework:** Spring Boot 3
-- **Language:** Java 21
+- **Language:** Java 17
 - **Database:** PostgreSQL (Hibernate / Spring Data JPA)
 - **Security:** Spring Security & JWT
 - **Messaging:** RabbitMQ & WebSockets (STOMP)
@@ -41,7 +41,7 @@ A robust, enterprise-grade RESTful API backend for managing a digital library of
 
 ## Getting Started
 
-1. Set up a PostgreSQL database and update your `application.yml` credentials.
+1. Set up a MySQL database and update your `application.properties` credentials.
 2. Ensure a RabbitMQ instance is running on `localhost:5672`.
 3. Ensure ClamAV is running on `localhost:3310` (or disable it in `application.yml`).
 4. Run `./mvnw spring-boot:run` to start the application on port `8080`.
