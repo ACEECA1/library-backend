@@ -2328,6 +2328,184 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "Metadata Management",
+            "item": [
+                {
+                    "name": "Get Categories",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/metadata/categories",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "metadata",
+                                "categories"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Tags",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/metadata/tags",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "metadata",
+                                "tags"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Series",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/metadata/series",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "metadata",
+                                "series"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Category",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Fiction\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/metadata/categories",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "metadata",
+                                "categories"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Tag",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Bestseller\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/metadata/tags",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "metadata",
+                                "tags"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Series",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Harry Potter\",\n    \"description\": \"Fantasy series\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/metadata/series",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "metadata",
+                                "series"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Category",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/metadata/categories/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "metadata",
+                                "categories",
+                                "1"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Tag",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/metadata/tags/1",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "metadata",
+                                "tags",
+                                "1"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ]
 }
