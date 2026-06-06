@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/api/books/1/approve"
+method: POST
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 6000

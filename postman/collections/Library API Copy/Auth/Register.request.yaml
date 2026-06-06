@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/api/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "testuser",
+      "password": "password123",
+      "firstName": "Test",
+      "lastName": "User",
+      "dateOfBirth": "1990-01-01"
+    }
+order: 1000

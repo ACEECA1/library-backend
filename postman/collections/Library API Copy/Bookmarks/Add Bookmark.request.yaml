@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/bookmarks"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "bookId": 1,
+      "note": "Read later"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1000

@@ -51,7 +51,7 @@ public class ReportService {
         report.setResolved(false);
 
         reportRepository.save(report);
-        auditLogService.logAction("SUBMIT_REPORT", "Reported " + dto.getTargetType() + " ID: " + dto.getTargetId());
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.SUBMIT_REPORT, "Reported " + dto.getTargetType() + " ID: " + dto.getTargetId());
     }
 
     /**
@@ -84,8 +84,8 @@ public class ReportService {
         report.setResolved(true);
         reportRepository.save(report);
 
-        auditLogService.logAction("RESOLVE_REPORT", "Resolved report ID: " + reportId);
-        notificationService.createForUser(report.getUser(), "Your report regarding " + report.getTargetType() + " has been resolved.", "REPORT_RESOLVED", report.getId());
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.RESOLVE_REPORT, "Resolved report ID: " + reportId);
+        notificationService.createForUser(report.getUser(), "Your report regarding " + report.getTargetType() + " has been resolved.", org.personal.library.model.NotificationType.REPORT_RESOLVED, report.getId());
     }
 
     private ReportResponseDTO mapToDTO(Report report) {

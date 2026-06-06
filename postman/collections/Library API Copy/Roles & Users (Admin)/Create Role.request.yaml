@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/admin/roles"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "CONTENT_MANAGER",
+      "permissions": ["UPLOAD_BOOK", "APPROVE_BOOK"]
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 2000

@@ -18,7 +18,10 @@ public class Notification extends BaseEntity {
 
     private String message;
     private boolean isRead = false;
-    private String type;
+
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    private NotificationType type;
+    
     private Long targetId;
 
     @ManyToOne(fetch = FetchType.LAZY)

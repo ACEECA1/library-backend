@@ -1,0 +1,19 @@
+package org.personal.library.model;
+
+public enum AuditLogAction {
+    UPLOAD_BOOK,
+    APPROVE_BOOK,
+    ADD_COMMENT,
+    PUBLISH_COMMENT,
+    SUBMIT_REPORT,
+    RESOLVE_REPORT,
+    CREATE_ROLE,
+    UPDATE_ROLE,
+    ASSIGN_ROLE,
+    ASSIGN_ROLE_BULK,
+    APPROVE_USER,
+    BAN_USER,
+    TIMEOUT_USER,
+    APPROVE_PASSWORD_RESET,
+    REJECT_PASSWORD_RESET
+}

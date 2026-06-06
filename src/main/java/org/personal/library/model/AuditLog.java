@@ -17,8 +17,9 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuditLog extends BaseEntity {
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
     @Column(nullable = false)
-    private String action;
+    private AuditLogAction action;
 
     @Column(length = 2000)
     private String details;

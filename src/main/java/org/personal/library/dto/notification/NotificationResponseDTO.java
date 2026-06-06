@@ -11,7 +11,7 @@ public class NotificationResponseDTO {
     Long id;
     String message;
     boolean isRead;
-    String type;
+    org.personal.library.model.NotificationType type;
     Long targetId;
     LocalDateTime createdAt;
 }

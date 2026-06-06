@@ -1,0 +1,32 @@
+$kind: http-request
+url: "{{baseUrl}}/api/books"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: title
+      value: My Awesome Book
+    - type: text
+      key: description
+      value: A great read.
+    - type: text
+      key: author
+      value: John Doe
+    - type: file
+      key: pdfFile
+      src: []
+    - type: file
+      key: thumbnailFile
+      src: []
+    - type: text
+      key: categoryIds
+      value: "1"
+    - type: text
+      key: tagIds
+      value: "1"
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1000

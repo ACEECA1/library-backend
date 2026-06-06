@@ -18,7 +18,7 @@ public class AuditLogService {
      * @param action a brief string representing the action type (e.g., "UPLOAD_BOOK", "APPROVE_USER")
      * @param details a detailed description of the action and its context
      */
-    public void logAction(String action, String details) {
+    public void logAction(org.personal.library.model.AuditLogAction action, String details) {
         String username = SecurityUtils.getCurrentUsername();
         if (username != null && !username.equals("anonymousUser")) {
             auditProducer.logAction(action, details, username);

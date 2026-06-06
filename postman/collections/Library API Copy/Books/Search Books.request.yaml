@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{baseUrl}}/api/books/search?q=awesome&category=Sci-Fi&sortBy=views"
+method: GET
+queryParams:
+  q: awesome
+  category: Sci-Fi
+  sortBy: views
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 4000

@@ -62,7 +62,7 @@ public class ReviewService {
         badgeProducer.publishEvent("REVIEW", user.getId());
 
         if (!user.getId().equals(book.getUploader().getId()) && book.getUploader() != null) {
-            notificationService.createForUser(book.getUploader(), user.getUsername() + " left a " + dto.getRating() + "-star review on your book: " + book.getTitle(), "BOOK_REVIEW", book.getId());
+            notificationService.createForUser(book.getUploader(), user.getUsername() + " left a " + dto.getRating() + "-star review on your book: " + book.getTitle(), org.personal.library.model.NotificationType.REVIEW, book.getId());
         }
     }
 

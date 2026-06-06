@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/metadata/tags"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "Bestseller",
+      "description": "Highly popular book"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000

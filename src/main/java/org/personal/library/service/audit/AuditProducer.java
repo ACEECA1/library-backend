@@ -14,7 +14,7 @@ public class AuditProducer {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public void logAction(String action, String details, String username) {
+    public void logAction(org.personal.library.model.AuditLogAction action, String details, String username) {
         try {
             AuditMessage message = new AuditMessage(action, details, username);
             rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.AUDIT_ROUTING_KEY, message);

@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{baseUrl}}/api/metadata/categories"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "Fantasy",
+      "description": "Fantasy books"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 1000

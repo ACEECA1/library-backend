@@ -72,12 +72,12 @@ public class CommentService {
         commentRepository.save(comment);
         
         if (!comment.isDraft()) {
-            auditLogService.logAction("ADD_COMMENT", "Added comment to book ID: " + bookId);
+            auditLogService.logAction(org.personal.library.model.AuditLogAction.ADD_COMMENT, "Added comment to book ID: " + bookId);
             if (!user.getId().equals(book.getUploader().getId()) && book.getUploader() != null) {
-                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle(), "BOOK_COMMENT", bookId);
+                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle(), org.personal.library.model.NotificationType.BOOK_COMMENT, bookId);
             }
             if (comment.getParentComment() != null && !user.getId().equals(comment.getParentComment().getUser().getId())) {
-                notificationService.createForUser(comment.getParentComment().getUser(), user.getUsername() + " replied to your comment.", "COMMENT_REPLY", comment.getParentComment().getId());
+                notificationService.createForUser(comment.getParentComment().getUser(), user.getUsername() + " replied to your comment.", org.personal.library.model.NotificationType.REPLY, comment.getParentComment().getId());
             }
         }
     }
@@ -131,10 +131,10 @@ public class CommentService {
         commentRepository.save(comment);
 
         if (wasDraft && !comment.isDraft()) {
-            auditLogService.logAction("PUBLISH_COMMENT", "Published draft comment ID: " + commentId);
+            auditLogService.logAction(org.personal.library.model.AuditLogAction.PUBLISH_COMMENT, "Published draft comment ID: " + commentId);
             Book book = comment.getBook();
             if (!comment.getUser().getId().equals(book.getUploader().getId()) && book.getUploader() != null) {
-                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle());
+                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle(), org.personal.library.model.NotificationType.BOOK_COMMENT, book.getId());
             }
         }
     }
@@ -179,7 +179,7 @@ public class CommentService {
         if (comment.getUpvotes() > 0 && !comment.getUser().getId().equals(user.getId())) {
              notificationService.createOrUpdateAggregatedNotification(
                   comment.getUser(),
-                  "COMMENT_UPVOTE",
+                  org.personal.library.model.NotificationType.UPVOTE,
                   comment.getId(),
                   "upvoted your comment.",
                   comment.getUpvotes(),
@@ -225,6 +225,17 @@ public class CommentService {
             commentVoteRepository.save(vote);
         }
         commentRepository.save(comment);
+
+        if (comment.getDownvotes() > 0 && !comment.getUser().getId().equals(user.getId())) {
+            notificationService.createOrUpdateAggregatedNotification(
+                    comment.getUser(),
+                    org.personal.library.model.NotificationType.DOWNVOTE,
+                    comment.getId(),
+                    "downvoted your comment.",
+                    comment.getDownvotes(),
+                    user.getUsername()
+            );
+        }
     }
 
     private CommentResponseDTO mapToDTO(Comment comment) {

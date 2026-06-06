@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/api/metadata/tags/1"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "Super Bestseller"
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 8000

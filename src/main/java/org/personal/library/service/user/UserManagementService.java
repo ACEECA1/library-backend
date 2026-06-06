@@ -29,6 +29,7 @@ public class UserManagementService {
     private final PasswordResetRequestRepository passwordResetRequestRepository;
     private final AuditLogService auditLogService;
     private final RefreshTokenService refreshTokenService;
+    private final org.personal.library.service.notification.NotificationService notificationService;
 
     /**
      * Retrieves a paginated list of users whose registrations are currently pending approval.
@@ -46,7 +47,8 @@ public class UserManagementService {
 
     /**
      * Approves a user's pending registration, transitioning their status from PENDING to ACTIVE.
-     * This grants them access to login and use the platform.
+     * This grants them access to login and use the platform. It also sends a USER_APPROVED notification.
+     * Example Notification: "Your account has been approved and activated."
      *
      * @param userId the unique identifier of the user to approve
      * @throws AppException if the user is not found or is not currently in a PENDING state
@@ -63,7 +65,8 @@ public class UserManagementService {
         user.setStatus(User.UserStatus.ACTIVE);
         userRepository.save(user);
 
-        auditLogService.logAction("APPROVE_USER", "Approved user ID: " + userId);
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.APPROVE_USER, "Approved user ID: " + userId);
+        notificationService.createForUser(user, "Your account has been approved and activated.", org.personal.library.model.NotificationType.USER_APPROVED, user.getId());
     }
 
     /**
@@ -83,7 +86,7 @@ public class UserManagementService {
 
         refreshTokenService.deleteByUserId(userId);
 
-        auditLogService.logAction("BAN_USER", "Banned user ID: " + userId);
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.BAN_USER, "Banned user ID: " + userId);
     }
 
     /**
@@ -104,7 +107,7 @@ public class UserManagementService {
 
         refreshTokenService.deleteByUserId(userId);
 
-        auditLogService.logAction("TIMEOUT_USER", "Timed out user ID: " + userId + " for " + minutes + " minutes");
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.TIMEOUT_USER, "Timed out user ID: " + userId + " for " + minutes + " minutes");
     }
 
     /**
@@ -149,7 +152,7 @@ public class UserManagementService {
         request.setResetToken(token);
         
         passwordResetRequestRepository.save(request);
-        auditLogService.logAction("APPROVE_PASSWORD_RESET", "Approved password reset for user ID: " + request.getUser().getId());
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.APPROVE_PASSWORD_RESET, "Approved password reset for user ID: " + request.getUser().getId());
         
         
         
@@ -174,7 +177,7 @@ public class UserManagementService {
 
         request.setStatus(PasswordResetRequest.ResetStatus.REJECTED);
         passwordResetRequestRepository.save(request);
-        auditLogService.logAction("REJECT_PASSWORD_RESET", "Rejected password reset for user ID: " + request.getUser().getId());
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.REJECT_PASSWORD_RESET, "Rejected password reset for user ID: " + request.getUser().getId());
     }
 
     private UserResponseDTO mapToDTO(User user) {

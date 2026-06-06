@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{baseUrl}}/api/admin/roles/1"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "permissions": ["UPLOAD_BOOK", "APPROVE_BOOK", "DELETE_BOOK"]
+    }
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000

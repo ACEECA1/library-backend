@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findByUserOrderByCreatedAtDesc(User user);
-    Optional<Notification> findFirstByUserAndTypeAndTargetIdOrderByCreatedAtDesc(User user, String type, Long targetId);
+    Optional<Notification> findFirstByUserAndTypeAndTargetIdOrderByCreatedAtDesc(User user, org.personal.library.model.NotificationType type, Long targetId);
     Optional<Notification> findByIdAndUser(Long id, User user);
 }

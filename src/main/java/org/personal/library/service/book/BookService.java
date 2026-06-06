@@ -123,13 +123,15 @@ public class BookService {
             }
 
             bookRepository.save(book);
-            auditLogService.logAction("UPLOAD_BOOK", "Uploaded book: " + book.getTitle());
+            auditLogService.logAction(org.personal.library.model.AuditLogAction.UPLOAD_BOOK, "Uploaded book: " + book.getTitle());
             badgeProducer.publishEvent("UPLOAD", uploader.getId());
             
             notificationService.createForUser(uploader,
                     book.getStatus() == Book.BookStatus.PENDING
                             ? "Book upload submitted for approval: " + book.getTitle()
-                            : "Book uploaded and published: " + book.getTitle());
+                            : "Book uploaded and published: " + book.getTitle(),
+                    book.getStatus() == Book.BookStatus.PENDING ? org.personal.library.model.NotificationType.BOOK_PENDING_APPROVAL : org.personal.library.model.NotificationType.BOOK_APPROVED,
+                    book.getId());
             if (book.getStatus() == Book.BookStatus.PENDING) {
                 notificationService.notifyAdmins("Book upload pending approval: " + book.getTitle());
             }
@@ -247,9 +249,9 @@ public class BookService {
         book.setApprovedBy(approver);
         bookRepository.save(book);
 
-        auditLogService.logAction("APPROVE_BOOK", "Approved book ID: " + book.getId());
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.APPROVE_BOOK, "Approved book ID: " + book.getId());
         if (book.getUploader() != null) {
-            notificationService.createForUser(book.getUploader(), "Book approved: " + book.getTitle());
+            notificationService.createForUser(book.getUploader(), "Book approved: " + book.getTitle(), org.personal.library.model.NotificationType.BOOK_APPROVED, book.getId());
         }
     }
 

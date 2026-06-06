@@ -9,7 +9,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuditMessage implements Serializable {
-    private String action;
+    private org.personal.library.model.AuditLogAction action;
     private String details;
     private String username;
 }

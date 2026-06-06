@@ -31,6 +31,7 @@ public class RoleManagementService {
     private final PermissionRepository permissionRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
+    private final org.personal.library.service.notification.NotificationService notificationService;
 
     /**
      * Creates a new role with a specified set of permissions.
@@ -56,7 +57,7 @@ public class RoleManagementService {
         role.setPermissions(permissions);
 
         Role saved = roleRepository.save(role);
-        auditLogService.logAction("CREATE_ROLE", "Created role: " + saved.getName());
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.CREATE_ROLE, "Created role: " + saved.getName());
         return mapToDTO(saved);
     }
 
@@ -81,7 +82,7 @@ public class RoleManagementService {
 
         role.setPermissions(permissions);
         Role saved = roleRepository.save(role);
-        auditLogService.logAction("UPDATE_ROLE", "Updated permissions for role: " + saved.getName());
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.UPDATE_ROLE, "Updated permissions for role: " + saved.getName());
         return mapToDTO(saved);
     }
 
@@ -115,6 +116,8 @@ public class RoleManagementService {
     /**
      * Assigns one or multiple roles to a specific user.
      * Active user sessions will be invalidated to enforce the new permissions immediately on their next request.
+     * This will send a notification to the user about the new roles assigned.
+     * Example Notification: "You have been assigned the following roles: MODERATOR, ADMIN"
      *
      * @param userId the unique identifier of the user receiving the roles
      * @param roleNames a set of role names to append to the user's current roles
@@ -132,12 +135,15 @@ public class RoleManagementService {
         }
         userRepository.save(user);
         invalidateUserSessions(user.getUsername());
-        auditLogService.logAction("ASSIGN_ROLE", "Assigned roles to user ID: " + userId);
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.ASSIGN_ROLE, "Assigned roles to user ID: " + userId);
+        notificationService.createForUser(user, "You have been assigned the following roles: " + String.join(", ", roleNames), org.personal.library.model.NotificationType.ROLE_ASSIGNED, user.getId());
     }
 
     /**
      * Assigns a single role to multiple users at once.
      * This is highly efficient for batch-promoting users (e.g., granting 'MODERATOR' to a list of trusted users).
+     * This will send a notification to each user about the new role assigned.
+     * Example Notification: "You have been assigned the following role: MODERATOR"
      *
      * @param roleName the name of the role being assigned
      * @param userIds a list of user IDs to receive the role
@@ -156,9 +162,10 @@ public class RoleManagementService {
         for (User user : users) {
             user.getRoles().add(role);
             invalidateUserSessions(user.getUsername());
+            notificationService.createForUser(user, "You have been assigned the following role: " + roleName, org.personal.library.model.NotificationType.ROLE_ASSIGNED, user.getId());
         }
         userRepository.saveAll(users);
-        auditLogService.logAction("ASSIGN_ROLE_BULK", "Assigned role " + roleName + " to users: " + userIds);
+        auditLogService.logAction(org.personal.library.model.AuditLogAction.ASSIGN_ROLE_BULK, "Assigned role " + roleName + " to users: " + userIds);
     }
 
     private void invalidateUserSessions(String username) {

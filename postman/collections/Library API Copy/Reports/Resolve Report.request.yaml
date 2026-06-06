@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/api/reports/1/resolve"
+method: POST
+auth:
+  type: bearer
+  credentials:
+    token: "{{token}}"
+order: 3000
