@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         boolean isAccountLocked = user.getStatus() == User.UserStatus.BANNED 
-                || (user.getBannedUntil() != null && user.getBannedUntil().isAfter(java.time.LocalDateTime.now()));
+                || (user.getBannedUntil() != null && user.getBannedUntil().isAfter(LocalDateTime.now()));
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())

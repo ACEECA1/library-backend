@@ -24,6 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.stream.Collectors;
 import org.personal.library.model.NotificationType;
 import org.personal.library.model.AuditLogAction;
+import java.util.List;
+import org.personal.library.model.PermissionType;
+import org.personal.library.service.audit.AuditLogService;
+import org.personal.library.service.notification.NotificationService;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +37,8 @@ public class CommentService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final CommentVoteRepository commentVoteRepository;
-    private final org.personal.library.service.audit.AuditLogService auditLogService;
-    private final org.personal.library.service.notification.NotificationService notificationService;
+    private final AuditLogService auditLogService;
+    private final NotificationService notificationService;
     private final BadgeProducer badgeProducer;
 
     /**
@@ -100,7 +104,7 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public java.util.List<CommentResponseDTO> getUserDraftsForBook(Long bookId) {
+    public List<CommentResponseDTO> getUserDraftsForBook(Long bookId) {
         String username = SecurityUtils.getCurrentUsername();
         if (username == null) {
             throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
@@ -282,7 +286,7 @@ public class CommentService {
         User user = userRepository.findByUsername(username).orElseThrow();
         boolean isModerator = user.getRoles().stream()
                 .anyMatch(r -> r.getPermissions().stream()
-                        .anyMatch(p -> p.getName() == org.personal.library.model.PermissionType.MODERATE_COMMENTS));
+                        .anyMatch(p -> p.getName() == PermissionType.MODERATE_COMMENTS));
 
         if (!comment.getUser().getUsername().equals(username) && !isModerator) {
             throw new AppException("You do not have permission to delete this comment", HttpStatus.FORBIDDEN);

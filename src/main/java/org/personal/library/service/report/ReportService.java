@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.personal.library.model.NotificationType;
 import org.personal.library.model.AuditLogAction;
+import org.personal.library.service.notification.NotificationService;
 
 @Service
 @RequiredArgsConstructor
@@ -26,7 +27,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
-    private final org.personal.library.service.notification.NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * Submits a new moderation report against a specific target (e.g., Book, Comment, User).

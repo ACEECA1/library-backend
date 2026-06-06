@@ -33,10 +33,21 @@ import java.util.List;
 import java.util.UUID;
 import org.personal.library.model.NotificationType;
 import org.personal.library.model.AuditLogAction;
+import java.util.HashSet;
+import java.util.concurrent.CompletableFuture;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.text.PDFTextStripper;
+import org.personal.library.config.AppProperties;
+import org.personal.library.dao.BookViewRepository;
+import org.personal.library.dao.CategoryRepository;
+import org.personal.library.dao.SeriesRepository;
+import org.personal.library.dao.TagRepository;
+import org.personal.library.dto.book.BookResponseDTO;
+import org.personal.library.model.BookView;
 
 @Service
 @RequiredArgsConstructor
-@lombok.extern.slf4j.Slf4j
+@Slf4j
 public class BookService {
 
     private final BookRepository bookRepository;
@@ -45,11 +56,11 @@ public class BookService {
     private final NotificationService notificationService;
     private final VirusScanService virusScanService;
     private final BadgeProducer badgeProducer;
-    private final org.personal.library.dao.CategoryRepository categoryRepository;
-    private final org.personal.library.dao.TagRepository tagRepository;
-    private final org.personal.library.dao.SeriesRepository seriesRepository;
-    private final org.personal.library.dao.BookViewRepository bookViewRepository;
-    private final org.personal.library.config.AppProperties appProperties;
+    private final CategoryRepository categoryRepository;
+    private final TagRepository tagRepository;
+    private final SeriesRepository seriesRepository;
+    private final BookViewRepository bookViewRepository;
+    private final AppProperties appProperties;
 
     @Transactional
     public void uploadBook(String title, String description, MultipartFile pdfFile, MultipartFile thumbnailFile,
@@ -103,10 +114,10 @@ public class BookService {
             book.setUploader(uploader);
 
             if (categoryIds != null && !categoryIds.isEmpty()) {
-                book.setCategories(new java.util.HashSet<>(categoryRepository.findAllById(categoryIds)));
+                book.setCategories(new HashSet<>(categoryRepository.findAllById(categoryIds)));
             }
             if (tagIds != null && !tagIds.isEmpty()) {
-                book.setTags(new java.util.HashSet<>(tagRepository.findAllById(tagIds)));
+                book.setTags(new HashSet<>(tagRepository.findAllById(tagIds)));
             }
             if (author != null && !author.isBlank()) {
                 book.setAuthor(author);
@@ -142,12 +153,12 @@ public class BookService {
             final Path finalThumbnailsPath = thumbnailsPath;
             final boolean generateThumb = (thumbnailFile == null || thumbnailFile.isEmpty());
 
-            java.util.concurrent.CompletableFuture.runAsync(() -> {
+            CompletableFuture.runAsync(() -> {
                 log.info("Starting background processing (thumbnail and text extraction) for Book ID: {}", book.getId());
                 try {
                     
                     try (PDDocument document = Loader.loadPDF(finalPdfPath.toFile())) {
-                        org.apache.pdfbox.text.PDFTextStripper stripper = new org.apache.pdfbox.text.PDFTextStripper();
+                        PDFTextStripper stripper = new PDFTextStripper();
                         String content = stripper.getText(document);
                         book.setContent(content);
                         log.debug("Successfully extracted text for Book ID: {}", book.getId());
@@ -202,27 +213,27 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public org.personal.library.dto.book.BookResponseDTO getBook(Long bookId) {
+    public BookResponseDTO getBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
         return mapToDTO(book);
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<org.personal.library.dto.book.BookResponseDTO> getAllLiveBooks(Pageable pageable) {
+    public PaginatedResponse<BookResponseDTO> getAllLiveBooks(Pageable pageable) {
         Page<Book> page = bookRepository.findByStatus(Book.BookStatus.LIVE, pageable);
         return PaginatedResponse.from(page.map(this::mapToDTO));
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<org.personal.library.dto.book.BookResponseDTO> searchBooks(String keyword, String category, String series, String sortBy, Pageable pageable) {
-        Page<org.personal.library.dto.book.BookResponseDTO> page = bookRepository.advancedSearch(keyword, category, series, sortBy, pageable)
+    public PaginatedResponse<BookResponseDTO> searchBooks(String keyword, String category, String series, String sortBy, Pageable pageable) {
+        Page<BookResponseDTO> page = bookRepository.advancedSearch(keyword, category, series, sortBy, pageable)
                 .map(this::mapToDTO);
         return PaginatedResponse.from(page);
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<org.personal.library.dto.book.BookResponseDTO> getPendingBooks(Pageable pageable) {
+    public PaginatedResponse<BookResponseDTO> getPendingBooks(Pageable pageable) {
         Page<Book> page = bookRepository.findByStatus(Book.BookStatus.PENDING, pageable);
         return PaginatedResponse.from(page.map(this::mapToDTO));
     }
@@ -278,7 +289,7 @@ public class BookService {
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
 
         if (!bookViewRepository.existsByUserIdAndBookId(user.getId(), book.getId())) {
-            org.personal.library.model.BookView view = new org.personal.library.model.BookView(user, book);
+            BookView view = new BookView(user, book);
             bookViewRepository.save(view);
             book.setViews(book.getViews() + 1);
             bookRepository.save(book);
@@ -286,7 +297,7 @@ public class BookService {
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<org.personal.library.dto.book.BookResponseDTO> getRelatedBooks(Long bookId, Pageable pageable) {
+    public PaginatedResponse<BookResponseDTO> getRelatedBooks(Long bookId, Pageable pageable) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
         
@@ -294,14 +305,14 @@ public class BookService {
             return PaginatedResponse.from(Page.empty(pageable));
         }
 
-        Page<org.personal.library.dto.book.BookResponseDTO> page = bookRepository
+        Page<BookResponseDTO> page = bookRepository
                 .findByCategoriesInAndStatusAndIdNot(book.getCategories(), Book.BookStatus.LIVE, book.getId(), pageable)
                 .map(this::mapToDTO);
         return PaginatedResponse.from(page);
     }
 
-    private org.personal.library.dto.book.BookResponseDTO mapToDTO(Book book) {
-        return org.personal.library.dto.book.BookResponseDTO.builder()
+    private BookResponseDTO mapToDTO(Book book) {
+        return BookResponseDTO.builder()
                 .id(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())

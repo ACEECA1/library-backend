@@ -19,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.personal.library.model.NotificationType;
+import org.personal.library.model.PermissionType;
+import org.personal.library.service.notification.NotificationService;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +30,7 @@ public class ReviewService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final BadgeProducer badgeProducer;
-    private final org.personal.library.service.notification.NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * Submits a new review or updates an existing one for a specific book by the authenticated user.
@@ -106,7 +108,7 @@ public class ReviewService {
             User currentUser = userRepository.findByUsername(username).orElseThrow();
             boolean hasModPermission = currentUser.getRoles().stream()
                     .flatMap(r -> r.getPermissions().stream())
-                    .anyMatch(p -> p.getName() == org.personal.library.model.PermissionType.MODERATE_COMMENTS);
+                    .anyMatch(p -> p.getName() == PermissionType.MODERATE_COMMENTS);
             if (!hasModPermission) {
                 throw new AppException("Unauthorized to delete this review", HttpStatus.FORBIDDEN);
             }

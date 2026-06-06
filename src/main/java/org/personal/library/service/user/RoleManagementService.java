@@ -24,6 +24,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.personal.library.model.NotificationType;
 import org.personal.library.model.AuditLogAction;
+import org.personal.library.model.PermissionType;
+import org.personal.library.service.notification.NotificationService;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +35,7 @@ public class RoleManagementService {
     private final PermissionRepository permissionRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
-    private final org.personal.library.service.notification.NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * Creates a new role with a specified set of permissions.
@@ -50,7 +52,7 @@ public class RoleManagementService {
         }
 
         Set<Permission> permissions = dto.getPermissions().stream()
-                .map(name -> permissionRepository.findByName(org.personal.library.model.PermissionType.valueOf(name))
+                .map(name -> permissionRepository.findByName(PermissionType.valueOf(name))
                         .orElseThrow(() -> new AppException("Permission not found: " + name, HttpStatus.BAD_REQUEST)))
                 .collect(Collectors.toSet());
 
@@ -78,7 +80,7 @@ public class RoleManagementService {
                 .orElseThrow(() -> new AppException("Role not found", HttpStatus.NOT_FOUND));
 
         Set<Permission> permissions = dto.getPermissions().stream()
-                .map(name -> permissionRepository.findByName(org.personal.library.model.PermissionType.valueOf(name))
+                .map(name -> permissionRepository.findByName(PermissionType.valueOf(name))
                         .orElseThrow(() -> new AppException("Permission not found: " + name, HttpStatus.BAD_REQUEST)))
                 .collect(Collectors.toSet());
 

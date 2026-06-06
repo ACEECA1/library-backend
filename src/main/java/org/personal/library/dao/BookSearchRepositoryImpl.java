@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import java.util.Collections;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,7 +23,7 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
     @Override
     public Page<Book> searchBooks(String keyword, Pageable pageable) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return new PageImpl<>(java.util.Collections.emptyList(), pageable, 0);
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
         }
 
         SearchSession searchSession = Search.session(entityManager);

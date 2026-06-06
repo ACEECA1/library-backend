@@ -11,6 +11,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import org.personal.library.dto.auth.PasswordResetRequestResponseDTO;
+import org.personal.library.dto.user.TimeoutRequestDTO;
 
 @RestController
 @RequestMapping("/api/admin/users")
@@ -35,7 +38,7 @@ public class UserManagementController {
 
     @PostMapping("/approve-bulk")
     @PreAuthorize("hasAuthority('USER_APPROVAL')")
-    public ResponseEntity<ApiResponse<Void>> approveUsersBulk(@RequestBody java.util.List<Long> ids) {
+    public ResponseEntity<ApiResponse<Void>> approveUsersBulk(@RequestBody List<Long> ids) {
         for(Long id : ids) {
             userManagementService.approveUser(id);
         }
@@ -51,14 +54,14 @@ public class UserManagementController {
 
     @PostMapping("/{id}/timeout")
     @PreAuthorize("hasAuthority('BAN_USER')")
-    public ResponseEntity<ApiResponse<Void>> timeoutUser(@PathVariable Long id, @RequestBody org.personal.library.dto.user.TimeoutRequestDTO request) {
+    public ResponseEntity<ApiResponse<Void>> timeoutUser(@PathVariable Long id, @RequestBody TimeoutRequestDTO request) {
         userManagementService.timeoutUser(id, request.getMinutes());
         return ResponseEntity.ok(ApiResponse.success(null, "User timed out successfully"));
     }
 
     @GetMapping("/password-resets/pending")
     @PreAuthorize("hasAuthority('USER_APPROVAL')")
-    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.auth.PasswordResetRequestResponseDTO>>> getPendingPasswordResets(
+    public ResponseEntity<ApiResponse<PaginatedResponse<PasswordResetRequestResponseDTO>>> getPendingPasswordResets(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(userManagementService.getPendingPasswordResets(pageable)));
     }

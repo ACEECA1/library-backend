@@ -18,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.net.MalformedURLException;
 import java.nio.file.Path;
+import java.util.List;
+import org.personal.library.dto.book.BookResponseDTO;
 
 @RestController
 @RequestMapping("/api/books")
@@ -33,8 +35,8 @@ public class BookController {
             @RequestParam(value = "description", required = false) String description,
             @RequestParam("pdfFile") MultipartFile pdfFile,
             @RequestParam(value = "thumbnailFile", required = false) MultipartFile thumbnailFile,
-            @RequestParam(value = "categoryIds", required = false) java.util.List<Long> categoryIds,
-            @RequestParam(value = "tagIds", required = false) java.util.List<Long> tagIds,
+            @RequestParam(value = "categoryIds", required = false) List<Long> categoryIds,
+            @RequestParam(value = "tagIds", required = false) List<Long> tagIds,
             @RequestParam(value = "author", required = false) String author,
             @RequestParam(value = "seriesId", required = false) Long seriesId) {
         
@@ -65,18 +67,18 @@ public class BookController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<org.personal.library.dto.book.BookResponseDTO>> getBook(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<BookResponseDTO>> getBook(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(bookService.getBook(id)));
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> getAllLiveBooks(
+    public ResponseEntity<ApiResponse<PaginatedResponse<BookResponseDTO>>> getAllLiveBooks(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(bookService.getAllLiveBooks(pageable)));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> searchBooks(
+    public ResponseEntity<ApiResponse<PaginatedResponse<BookResponseDTO>>> searchBooks(
             @RequestParam(value = "q", required = false) String keyword,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "series", required = false) String series,
@@ -87,7 +89,7 @@ public class BookController {
 
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('APPROVE_BOOK')")
-    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> getPendingBooks(
+    public ResponseEntity<ApiResponse<PaginatedResponse<BookResponseDTO>>> getPendingBooks(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(bookService.getPendingBooks(pageable)));
     }
@@ -102,7 +104,7 @@ public class BookController {
 
 
     @GetMapping("/{id}/related")
-    public ResponseEntity<ApiResponse<PaginatedResponse<org.personal.library.dto.book.BookResponseDTO>>> getRelatedBooks(
+    public ResponseEntity<ApiResponse<PaginatedResponse<BookResponseDTO>>> getRelatedBooks(
             @PathVariable Long id,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(bookService.getRelatedBooks(id, pageable)));

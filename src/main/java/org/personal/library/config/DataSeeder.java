@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.personal.library.model.PermissionType;
 
 @Component
 @RequiredArgsConstructor
@@ -35,7 +36,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedPermissionsAndRoles() {
         Set<Permission> allPermissions = new HashSet<>();
-        for (org.personal.library.model.PermissionType pName : org.personal.library.model.PermissionType.values()) {
+        for (PermissionType pName : PermissionType.values()) {
             Permission permission = permissionRepository.findByName(pName).orElseGet(() -> {
                 Permission p = new Permission();
                 p.setName(pName);
@@ -60,9 +61,9 @@ public class DataSeeder implements CommandLineRunner {
         
         Set<Permission> modPermissions = new HashSet<>();
         for (Permission p : allPermissions) {
-            if (p.getName() == org.personal.library.model.PermissionType.MODERATE_COMMENTS || 
-                p.getName() == org.personal.library.model.PermissionType.BAN_USER || 
-                p.getName() == org.personal.library.model.PermissionType.USER_APPROVAL) {
+            if (p.getName() == PermissionType.MODERATE_COMMENTS || 
+                p.getName() == PermissionType.BAN_USER || 
+                p.getName() == PermissionType.USER_APPROVAL) {
                 modPermissions.add(p);
             }
         }

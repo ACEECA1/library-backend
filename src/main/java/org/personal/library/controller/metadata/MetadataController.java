@@ -15,6 +15,7 @@ import org.personal.library.model.Book;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/metadata")
@@ -47,7 +48,7 @@ public class MetadataController {
     public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
         Category category = categoryRepository.findById(id).orElse(null);
         if (category != null) {
-            java.util.List<Book> books = bookRepository.findAll();
+            List<Book> books = bookRepository.findAll();
             for (Book book : books) {
                 if (book.getCategories().contains(category)) {
                     book.getCategories().remove(category);
@@ -63,7 +64,7 @@ public class MetadataController {
     public ResponseEntity<ApiResponse<Void>> deleteTag(@PathVariable Long id) {
         Tag tag = tagRepository.findById(id).orElse(null);
         if (tag != null) {
-            java.util.List<Book> books = bookRepository.findAll();
+            List<Book> books = bookRepository.findAll();
             for (Book book : books) {
                 if (book.getTags().contains(tag)) {
                     book.getTags().remove(tag);

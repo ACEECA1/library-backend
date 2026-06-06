@@ -10,13 +10,14 @@ import java.nio.file.Path;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.personal.library.config.AppProperties;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class VirusScanService {
 
-    private final org.personal.library.config.AppProperties appProperties;
+    private final AppProperties appProperties;
 
     /**
      * Submits a physical PDF file to a ClamAV server to scan for viruses or malicious payloads.

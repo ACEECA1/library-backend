@@ -22,6 +22,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import org.personal.library.model.NotificationType;
 import org.personal.library.model.AuditLogAction;
+import java.time.LocalDateTime;
+import org.personal.library.service.notification.NotificationService;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class UserManagementService {
     private final PasswordResetRequestRepository passwordResetRequestRepository;
     private final AuditLogService auditLogService;
     private final RefreshTokenService refreshTokenService;
-    private final org.personal.library.service.notification.NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * Retrieves a paginated list of users whose registrations are currently pending approval.
@@ -104,7 +106,7 @@ public class UserManagementService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        user.setBannedUntil(java.time.LocalDateTime.now().plusMinutes(minutes));
+        user.setBannedUntil(LocalDateTime.now().plusMinutes(minutes));
         userRepository.save(user);
 
         refreshTokenService.deleteByUserId(userId);

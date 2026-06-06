@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Getter
@@ -17,7 +19,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class AuditLog extends BaseEntity {
 
-    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AuditLogAction action;
 

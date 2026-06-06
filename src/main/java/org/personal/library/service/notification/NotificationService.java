@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import org.personal.library.model.NotificationType;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -67,7 +69,7 @@ public class NotificationService {
      */
     @Transactional
     public NotificationResponseDTO createOrUpdateAggregatedNotification(User user, NotificationType type, Long targetId, String baseMessage, int count, String initiatorUsername) {
-        java.util.Optional<Notification> opt = notificationRepository.findFirstByUserAndTypeAndTargetIdOrderByCreatedAtDesc(user, type, targetId);
+        Optional<Notification> opt = notificationRepository.findFirstByUserAndTypeAndTargetIdOrderByCreatedAtDesc(user, type, targetId);
         Notification notification;
         String message;
         if (count > 1) {
@@ -80,7 +82,7 @@ public class NotificationService {
             notification = opt.get();
             notification.setMessage(message);
             notification.setRead(false);
-            notification.setCreatedAt(java.time.LocalDateTime.now());
+            notification.setCreatedAt(LocalDateTime.now());
         } else {
             notification = new Notification();
             notification.setUser(user);

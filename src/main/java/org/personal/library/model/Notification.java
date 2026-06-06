@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 
 @Entity
 @Getter
@@ -19,7 +21,7 @@ public class Notification extends BaseEntity {
     private String message;
     private boolean isRead = false;
 
-    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     private NotificationType type;
     
     private Long targetId;
