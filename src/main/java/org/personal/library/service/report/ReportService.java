@@ -24,6 +24,7 @@ public class ReportService {
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
     private final AuditLogService auditLogService;
+    private final org.personal.library.service.notification.NotificationService notificationService;
 
     /**
      * Submits a new moderation report against a specific target (e.g., Book, Comment, User).
@@ -84,6 +85,7 @@ public class ReportService {
         reportRepository.save(report);
 
         auditLogService.logAction("RESOLVE_REPORT", "Resolved report ID: " + reportId);
+        notificationService.createForUser(report.getUser(), "Your report regarding " + report.getTargetType() + " has been resolved.", "REPORT_RESOLVED", report.getId());
     }
 
     private ReportResponseDTO mapToDTO(Report report) {

@@ -27,6 +27,7 @@ public class ReviewService {
     private final BookRepository bookRepository;
     private final UserRepository userRepository;
     private final BadgeProducer badgeProducer;
+    private final org.personal.library.service.notification.NotificationService notificationService;
 
     /**
      * Submits a new review or updates an existing one for a specific book by the authenticated user.
@@ -59,6 +60,10 @@ public class ReviewService {
         updateBookRating(book);
         
         badgeProducer.publishEvent("REVIEW", user.getId());
+
+        if (!user.getId().equals(book.getUploader().getId()) && book.getUploader() != null) {
+            notificationService.createForUser(book.getUploader(), user.getUsername() + " left a " + dto.getRating() + "-star review on your book: " + book.getTitle(), "BOOK_REVIEW", book.getId());
+        }
     }
 
     /**
