@@ -6,5 +6,6 @@ public enum PermissionType {
     MODERATE_COMMENTS,
     BAN_USER,
     USER_APPROVAL,
-    MANAGE_ROLES
+    MANAGE_ROLES,
+    MANAGE_METADATA
 }

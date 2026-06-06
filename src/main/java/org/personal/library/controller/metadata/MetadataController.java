@@ -2,86 +2,71 @@ package org.personal.library.controller.metadata;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.personal.library.dao.CategoryRepository;
-import org.personal.library.dao.SeriesRepository;
-import org.personal.library.dao.TagRepository;
-import org.personal.library.dao.BookRepository;
 import org.personal.library.dto.common.ApiResponse;
 import org.personal.library.dto.metadata.MetadataRequestDTO;
 import org.personal.library.model.Category;
 import org.personal.library.model.Series;
 import org.personal.library.model.Tag;
-import org.personal.library.model.Book;
+import org.personal.library.service.metadata.MetadataService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/metadata")
+@RequestMapping("/api/metadata")
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('APPROVE_BOOK')")
 public class MetadataController {
 
-    private final CategoryRepository categoryRepository;
-    private final TagRepository tagRepository;
-    private final SeriesRepository seriesRepository;
-    private final BookRepository bookRepository;
+    private final MetadataService metadataService;
+
+    @GetMapping("/categories")
+    public ResponseEntity<ApiResponse<List<Category>>> getCategories() {
+        return ResponseEntity.ok(ApiResponse.success(metadataService.getAllCategories()));
+    }
+
+    @GetMapping("/tags")
+    public ResponseEntity<ApiResponse<List<Tag>>> getTags() {
+        return ResponseEntity.ok(ApiResponse.success(metadataService.getAllTags()));
+    }
+
+    @GetMapping("/series")
+    public ResponseEntity<ApiResponse<List<Series>>> getSeries() {
+        return ResponseEntity.ok(ApiResponse.success(metadataService.getAllSeries()));
+    }
 
     @PostMapping("/categories")
+    @PreAuthorize("hasAuthority('MANAGE_METADATA')")
     public ResponseEntity<ApiResponse<Void>> createCategory(@Valid @RequestBody MetadataRequestDTO dto) {
-        Category cat = new Category();
-        cat.setName(dto.getName());
-        categoryRepository.save(cat);
+        metadataService.createCategory(dto.getName());
         return ResponseEntity.ok(ApiResponse.success(null, "Category created"));
     }
 
     @PostMapping("/tags")
+    @PreAuthorize("hasAuthority('MANAGE_METADATA')")
     public ResponseEntity<ApiResponse<Void>> createTag(@Valid @RequestBody MetadataRequestDTO dto) {
-        Tag tag = new Tag();
-        tag.setName(dto.getName());
-        tagRepository.save(tag);
+        metadataService.createTag(dto.getName());
         return ResponseEntity.ok(ApiResponse.success(null, "Tag created"));
     }
 
     @DeleteMapping("/categories/{id}")
+    @PreAuthorize("hasAuthority('MANAGE_METADATA')")
     public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable Long id) {
-        Category category = categoryRepository.findById(id).orElse(null);
-        if (category != null) {
-            List<Book> books = bookRepository.findAll();
-            for (Book book : books) {
-                if (book.getCategories().contains(category)) {
-                    book.getCategories().remove(category);
-                    bookRepository.save(book);
-                }
-            }
-            categoryRepository.deleteById(id);
-        }
+        metadataService.deleteCategory(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Category deleted"));
     }
 
     @DeleteMapping("/tags/{id}")
+    @PreAuthorize("hasAuthority('MANAGE_METADATA')")
     public ResponseEntity<ApiResponse<Void>> deleteTag(@PathVariable Long id) {
-        Tag tag = tagRepository.findById(id).orElse(null);
-        if (tag != null) {
-            List<Book> books = bookRepository.findAll();
-            for (Book book : books) {
-                if (book.getTags().contains(tag)) {
-                    book.getTags().remove(tag);
-                    bookRepository.save(book);
-                }
-            }
-            tagRepository.deleteById(id);
-        }
+        metadataService.deleteTag(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Tag deleted"));
     }
 
     @PostMapping("/series")
+    @PreAuthorize("hasAuthority('MANAGE_METADATA')")
     public ResponseEntity<ApiResponse<Void>> createSeries(@Valid @RequestBody MetadataRequestDTO dto) {
-        Series series = new Series();
-        series.setName(dto.getName());
-        series.setDescription(dto.getDescription());
-        seriesRepository.save(series);
+        metadataService.createSeries(dto.getName(), dto.getDescription());
         return ResponseEntity.ok(ApiResponse.success(null, "Series created"));
     }
 }
