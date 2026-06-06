@@ -1,11 +1,11 @@
 # Digital Library Management System
 
-A robust, enterprise-grade RESTful API backend for managing a digital library of PDF books. Built with Spring Boot 3, Java 21, and PostgreSQL, this system offers a comprehensive suite of features for administrators and users.
+A robust, enterprise-grade RESTful API backend for managing a digital library of PDF books. Built with Spring Boot 3, Java 17, and MySQL, this system offers a comprehensive suite of features for administrators and users.
 
 ## Core Features
 
 - **Authentication & Security**
-  - Secure JWT-based authentication and role-based access control (RBAC).
+  - Secure JWT-based authentication and role-based and permission-based access control hybrid.
   - Password reset workflows, account banning, timeouts, and session invalidation.
 
 - **Book Management & Processing**
@@ -33,7 +33,7 @@ A robust, enterprise-grade RESTful API backend for managing a digital library of
 ## Tech Stack
 - **Framework:** Spring Boot 3
 - **Language:** Java 17
-- **Database:** PostgreSQL (Hibernate / Spring Data JPA)
+- **Database:** MySQL (Hibernate / Spring Data JPA)
 - **Security:** Spring Security & JWT
 - **Messaging:** RabbitMQ & WebSockets (STOMP)
 - **Document Processing:** Apache PDFBox
