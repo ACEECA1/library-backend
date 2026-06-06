@@ -11,6 +11,5 @@ public class RoleCreateRequestDTO {
     @NotBlank(message = "Role name is required")
     private String name;
 
-    @NotEmpty(message = "At least one permission is required")
     private Set<String> permissions;
 }

@@ -8,7 +8,6 @@ import java.util.Set;
 @Data
 public class RoleUpdateRequestDTO {
 
-    @NotEmpty(message = "Permissions set cannot be empty")
     private Set<String> permissions;
 
 }
