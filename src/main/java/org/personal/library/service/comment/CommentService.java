@@ -64,6 +64,7 @@ public class CommentService {
 
         if (dto.getParentCommentId() != null) {
             Comment parent = commentRepository.findById(dto.getParentCommentId())
+
                     .orElseThrow(() -> new AppException("Parent comment not found", HttpStatus.NOT_FOUND));
             comment.setParentComment(parent);
         }
@@ -73,7 +74,10 @@ public class CommentService {
         if (!comment.isDraft()) {
             auditLogService.logAction("ADD_COMMENT", "Added comment to book ID: " + bookId);
             if (!user.getId().equals(book.getUploader().getId()) && book.getUploader() != null) {
-                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle());
+                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle(), "BOOK_COMMENT", bookId);
+            }
+            if (comment.getParentComment() != null && !user.getId().equals(comment.getParentComment().getUser().getId())) {
+                notificationService.createForUser(comment.getParentComment().getUser(), user.getUsername() + " replied to your comment.", "COMMENT_REPLY", comment.getParentComment().getId());
             }
         }
     }
@@ -171,6 +175,17 @@ public class CommentService {
             commentVoteRepository.save(vote);
         }
         commentRepository.save(comment);
+
+        if (comment.getUpvotes() > 0 && !comment.getUser().getId().equals(user.getId())) {
+             notificationService.createOrUpdateAggregatedNotification(
+                  comment.getUser(),
+                  "COMMENT_UPVOTE",
+                  comment.getId(),
+                  "upvoted your comment.",
+                  comment.getUpvotes(),
+                  user.getUsername()
+             );
+        }
 
         badgeProducer.publishEvent("UPVOTE", comment.getUser().getId());
     }

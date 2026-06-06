@@ -33,10 +33,61 @@ public class NotificationService {
      */
     @Transactional
     public NotificationResponseDTO createForUser(User user, String message) {
+        return createForUser(user, message, null, null);
+    }
+
+    /**
+     * Creates a new notification for a specific user and sends it over WebSocket.
+     * Includes type and targetId for aggregating or identifying specific entities.
+     *
+     * @param user the recipient of the notification
+     * @param message the content of the notification
+     * @param type the type of notification (e.g. "UPVOTE", "REPLY")
+     * @param targetId the ID of the related entity
+     * @return a NotificationResponseDTO representing the newly created notification
+     */
+    @Transactional
+    public NotificationResponseDTO createForUser(User user, String message, String type, Long targetId) {
         Notification notification = new Notification();
         notification.setMessage(message);
         notification.setUser(user);
+        notification.setType(type);
+        notification.setTargetId(targetId);
         notification.setRead(false);
+
+        Notification saved = notificationRepository.save(notification);
+        NotificationResponseDTO response = mapToDTO(saved);
+        messagingTemplate.convertAndSendToUser(user.getUsername(), "/queue/notifications", response);
+        return response;
+    }
+
+    /**
+     * Creates or updates an aggregated notification. For example, grouping upvotes together.
+     */
+    @Transactional
+    public NotificationResponseDTO createOrUpdateAggregatedNotification(User user, String type, Long targetId, String baseMessage, int count, String initiatorUsername) {
+        java.util.Optional<Notification> opt = notificationRepository.findFirstByUserAndTypeAndTargetIdOrderByCreatedAtDesc(user, type, targetId);
+        Notification notification;
+        String message;
+        if (count > 1) {
+            message = initiatorUsername + " and " + (count - 1) + " others " + baseMessage;
+        } else {
+            message = initiatorUsername + " " + baseMessage;
+        }
+
+        if (opt.isPresent()) {
+            notification = opt.get();
+            notification.setMessage(message);
+            notification.setRead(false);
+            notification.setCreatedAt(java.time.LocalDateTime.now());
+        } else {
+            notification = new Notification();
+            notification.setUser(user);
+            notification.setType(type);
+            notification.setTargetId(targetId);
+            notification.setMessage(message);
+            notification.setRead(false);
+        }
 
         Notification saved = notificationRepository.save(notification);
         NotificationResponseDTO response = mapToDTO(saved);
@@ -116,6 +167,8 @@ public class NotificationService {
                 .id(notification.getId())
                 .message(notification.getMessage())
                 .isRead(notification.isRead())
+                .type(notification.getType())
+                .targetId(notification.getTargetId())
                 .createdAt(notification.getCreatedAt())
                 .build();
     }

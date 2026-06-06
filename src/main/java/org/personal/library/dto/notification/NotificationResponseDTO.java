@@ -11,5 +11,7 @@ public class NotificationResponseDTO {
     Long id;
     String message;
     boolean isRead;
+    String type;
+    Long targetId;
     LocalDateTime createdAt;
 }
