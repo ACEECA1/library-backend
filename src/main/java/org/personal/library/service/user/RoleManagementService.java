@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.personal.library.model.NotificationType;
+import org.personal.library.model.AuditLogAction;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +59,7 @@ public class RoleManagementService {
         role.setPermissions(permissions);
 
         Role saved = roleRepository.save(role);
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.CREATE_ROLE, "Created role: " + saved.getName());
+        auditLogService.logAction(AuditLogAction.CREATE_ROLE, "Created role: " + saved.getName());
         return mapToDTO(saved);
     }
 
@@ -82,7 +84,7 @@ public class RoleManagementService {
 
         role.setPermissions(permissions);
         Role saved = roleRepository.save(role);
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.UPDATE_ROLE, "Updated permissions for role: " + saved.getName());
+        auditLogService.logAction(AuditLogAction.UPDATE_ROLE, "Updated permissions for role: " + saved.getName());
         return mapToDTO(saved);
     }
 
@@ -135,8 +137,8 @@ public class RoleManagementService {
         }
         userRepository.save(user);
         invalidateUserSessions(user.getUsername());
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.ASSIGN_ROLE, "Assigned roles to user ID: " + userId);
-        notificationService.createForUser(user, "You have been assigned the following roles: " + String.join(", ", roleNames), org.personal.library.model.NotificationType.ROLE_ASSIGNED, user.getId());
+        auditLogService.logAction(AuditLogAction.ASSIGN_ROLE, "Assigned roles to user ID: " + userId);
+        notificationService.createForUser(user, "You have been assigned the following roles: " + String.join(", ", roleNames), NotificationType.ROLE_ASSIGNED, user.getId());
     }
 
     /**
@@ -162,10 +164,10 @@ public class RoleManagementService {
         for (User user : users) {
             user.getRoles().add(role);
             invalidateUserSessions(user.getUsername());
-            notificationService.createForUser(user, "You have been assigned the following role: " + roleName, org.personal.library.model.NotificationType.ROLE_ASSIGNED, user.getId());
+            notificationService.createForUser(user, "You have been assigned the following role: " + roleName, NotificationType.ROLE_ASSIGNED, user.getId());
         }
         userRepository.saveAll(users);
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.ASSIGN_ROLE_BULK, "Assigned role " + roleName + " to users: " + userIds);
+        auditLogService.logAction(AuditLogAction.ASSIGN_ROLE_BULK, "Assigned role " + roleName + " to users: " + userIds);
     }
 
     private void invalidateUserSessions(String username) {

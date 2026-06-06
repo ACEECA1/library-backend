@@ -22,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
+import org.personal.library.model.NotificationType;
+import org.personal.library.model.AuditLogAction;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +44,7 @@ public class CommentService {
      * @param bookId the unique identifier of the book being commented on
      * @param dto the data transfer object containing the comment text, optional parent ID (for replies), and draft status
      * @throws AppException if the user or book is not found, or if an invalid parent comment ID is provided
+     * Example Notification: "john_doe replied to your comment." or "Someone commented on your book: The Great Gatsby"
      */
     @Transactional
     public void addComment(Long bookId, CommentRequestDTO dto) {
@@ -72,12 +75,12 @@ public class CommentService {
         commentRepository.save(comment);
         
         if (!comment.isDraft()) {
-            auditLogService.logAction(org.personal.library.model.AuditLogAction.ADD_COMMENT, "Added comment to book ID: " + bookId);
+            auditLogService.logAction(AuditLogAction.ADD_COMMENT, "Added comment to book ID: " + bookId);
             if (!user.getId().equals(book.getUploader().getId()) && book.getUploader() != null) {
-                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle(), org.personal.library.model.NotificationType.BOOK_COMMENT, bookId);
+                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle(), NotificationType.BOOK_COMMENT, bookId);
             }
             if (comment.getParentComment() != null && !user.getId().equals(comment.getParentComment().getUser().getId())) {
-                notificationService.createForUser(comment.getParentComment().getUser(), user.getUsername() + " replied to your comment.", org.personal.library.model.NotificationType.REPLY, comment.getParentComment().getId());
+                notificationService.createForUser(comment.getParentComment().getUser(), user.getUsername() + " replied to your comment.", NotificationType.REPLY, comment.getParentComment().getId());
             }
         }
     }
@@ -114,6 +117,7 @@ public class CommentService {
      * Only the author of the comment is permitted to update it.
      *
      * @param commentId the unique identifier of the comment to update
+     * Example Notification: "Someone commented on your book: The Great Gatsby" (if publishing a draft)
      * @param dto the data transfer object containing the updated text and draft status
      * @throws AppException if the comment is not found or the user is not the author
      */
@@ -131,10 +135,10 @@ public class CommentService {
         commentRepository.save(comment);
 
         if (wasDraft && !comment.isDraft()) {
-            auditLogService.logAction(org.personal.library.model.AuditLogAction.PUBLISH_COMMENT, "Published draft comment ID: " + commentId);
+            auditLogService.logAction(AuditLogAction.PUBLISH_COMMENT, "Published draft comment ID: " + commentId);
             Book book = comment.getBook();
             if (!comment.getUser().getId().equals(book.getUploader().getId()) && book.getUploader() != null) {
-                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle(), org.personal.library.model.NotificationType.BOOK_COMMENT, book.getId());
+                notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle(), NotificationType.BOOK_COMMENT, book.getId());
             }
         }
     }
@@ -143,7 +147,8 @@ public class CommentService {
      * Registers or toggles an upvote by the authenticated user on a specific comment.
      * If the user already upvoted, the vote is removed. If they downvoted previously, it switches to an upvote.
      * This may also trigger a badge event evaluation for the comment's author.
-     *
+     *     * Example Notification: "john_doe upvoted your comment."
+
      * @param commentId the unique identifier of the comment being upvoted
      * @throws AppException if the user or comment cannot be found
      */
@@ -179,7 +184,7 @@ public class CommentService {
         if (comment.getUpvotes() > 0 && !comment.getUser().getId().equals(user.getId())) {
              notificationService.createOrUpdateAggregatedNotification(
                   comment.getUser(),
-                  org.personal.library.model.NotificationType.UPVOTE,
+                  NotificationType.UPVOTE,
                   comment.getId(),
                   "upvoted your comment.",
                   comment.getUpvotes(),
@@ -196,6 +201,7 @@ public class CommentService {
      *
      * @param commentId the unique identifier of the comment being downvoted
      * @throws AppException if the user or comment cannot be found
+     * Example Notification: "john_doe downvoted your comment."
      */
     @Transactional
     public void downvoteComment(Long commentId) {
@@ -229,7 +235,7 @@ public class CommentService {
         if (comment.getDownvotes() > 0 && !comment.getUser().getId().equals(user.getId())) {
             notificationService.createOrUpdateAggregatedNotification(
                     comment.getUser(),
-                    org.personal.library.model.NotificationType.DOWNVOTE,
+                    NotificationType.DOWNVOTE,
                     comment.getId(),
                     "downvoted your comment.",
                     comment.getDownvotes(),

@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.personal.library.model.NotificationType;
+import org.personal.library.model.AuditLogAction;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class ReportService {
         report.setResolved(false);
 
         reportRepository.save(report);
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.SUBMIT_REPORT, "Reported " + dto.getTargetType() + " ID: " + dto.getTargetId());
+        auditLogService.logAction(AuditLogAction.SUBMIT_REPORT, "Reported " + dto.getTargetType() + " ID: " + dto.getTargetId());
     }
 
     /**
@@ -75,6 +77,7 @@ public class ReportService {
      *
      * @param reportId the unique identifier of the report to mark as resolved
      * @throws AppException if the report with the given ID cannot be found
+     * Example Notification: "Your report regarding comment ID 123 has been resolved."
      */
     @Transactional
     public void resolveReport(Long reportId) {
@@ -84,8 +87,8 @@ public class ReportService {
         report.setResolved(true);
         reportRepository.save(report);
 
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.RESOLVE_REPORT, "Resolved report ID: " + reportId);
-        notificationService.createForUser(report.getUser(), "Your report regarding " + report.getTargetType() + " has been resolved.", org.personal.library.model.NotificationType.REPORT_RESOLVED, report.getId());
+        auditLogService.logAction(AuditLogAction.RESOLVE_REPORT, "Resolved report ID: " + reportId);
+        notificationService.createForUser(report.getUser(), "Your report regarding " + report.getTargetType() + " has been resolved.", NotificationType.REPORT_RESOLVED, report.getId());
     }
 
     private ReportResponseDTO mapToDTO(Report report) {

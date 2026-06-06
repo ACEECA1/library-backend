@@ -3,6 +3,7 @@ package org.personal.library.service.audit;
 import lombok.RequiredArgsConstructor;
 import org.personal.library.util.SecurityUtils;
 import org.springframework.stereotype.Service;
+import org.personal.library.model.AuditLogAction;
 
 @Service
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class AuditLogService {
      * @param action a brief string representing the action type (e.g., "UPLOAD_BOOK", "APPROVE_USER")
      * @param details a detailed description of the action and its context
      */
-    public void logAction(org.personal.library.model.AuditLogAction action, String details) {
+    public void logAction(AuditLogAction action, String details) {
         String username = SecurityUtils.getCurrentUsername();
         if (username != null && !username.equals("anonymousUser")) {
             auditProducer.logAction(action, details, username);

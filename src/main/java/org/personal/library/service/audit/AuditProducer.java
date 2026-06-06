@@ -6,6 +6,7 @@ import org.personal.library.config.RabbitMQConfig;
 import org.personal.library.dto.audit.AuditMessage;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.personal.library.model.AuditLogAction;
 
 @Service
 @RequiredArgsConstructor
@@ -14,7 +15,7 @@ public class AuditProducer {
 
     private final RabbitTemplate rabbitTemplate;
 
-    public void logAction(org.personal.library.model.AuditLogAction action, String details, String username) {
+    public void logAction(AuditLogAction action, String details, String username) {
         try {
             AuditMessage message = new AuditMessage(action, details, username);
             rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.AUDIT_ROUTING_KEY, message);

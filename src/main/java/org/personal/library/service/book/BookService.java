@@ -31,6 +31,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
+import org.personal.library.model.NotificationType;
+import org.personal.library.model.AuditLogAction;
 
 @Service
 @RequiredArgsConstructor
@@ -123,14 +125,14 @@ public class BookService {
             }
 
             bookRepository.save(book);
-            auditLogService.logAction(org.personal.library.model.AuditLogAction.UPLOAD_BOOK, "Uploaded book: " + book.getTitle());
+            auditLogService.logAction(AuditLogAction.UPLOAD_BOOK, "Uploaded book: " + book.getTitle());
             badgeProducer.publishEvent("UPLOAD", uploader.getId());
             
             notificationService.createForUser(uploader,
                     book.getStatus() == Book.BookStatus.PENDING
                             ? "Book upload submitted for approval: " + book.getTitle()
                             : "Book uploaded and published: " + book.getTitle(),
-                    book.getStatus() == Book.BookStatus.PENDING ? org.personal.library.model.NotificationType.BOOK_PENDING_APPROVAL : org.personal.library.model.NotificationType.BOOK_APPROVED,
+                    book.getStatus() == Book.BookStatus.PENDING ? NotificationType.BOOK_PENDING_APPROVAL : NotificationType.BOOK_APPROVED,
                     book.getId());
             if (book.getStatus() == Book.BookStatus.PENDING) {
                 notificationService.notifyAdmins("Book upload pending approval: " + book.getTitle());
@@ -232,6 +234,7 @@ public class BookService {
      *
      * @param bookId the unique identifier of the pending book to approve
      * @throws AppException if the book is not found or is not in PENDING status
+     * Example Notification: "Your book 'The Great Gatsby' has been approved!"
      */
     @Transactional
     public void approveBook(Long bookId) {
@@ -249,9 +252,9 @@ public class BookService {
         book.setApprovedBy(approver);
         bookRepository.save(book);
 
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.APPROVE_BOOK, "Approved book ID: " + book.getId());
+        auditLogService.logAction(AuditLogAction.APPROVE_BOOK, "Approved book ID: " + book.getId());
         if (book.getUploader() != null) {
-            notificationService.createForUser(book.getUploader(), "Book approved: " + book.getTitle(), org.personal.library.model.NotificationType.BOOK_APPROVED, book.getId());
+            notificationService.createForUser(book.getUploader(), "Book approved: " + book.getTitle(), NotificationType.BOOK_APPROVED, book.getId());
         }
     }
 

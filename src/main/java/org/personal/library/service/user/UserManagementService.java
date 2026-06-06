@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.personal.library.model.NotificationType;
+import org.personal.library.model.AuditLogAction;
 
 @Service
 @RequiredArgsConstructor
@@ -65,8 +67,8 @@ public class UserManagementService {
         user.setStatus(User.UserStatus.ACTIVE);
         userRepository.save(user);
 
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.APPROVE_USER, "Approved user ID: " + userId);
-        notificationService.createForUser(user, "Your account has been approved and activated.", org.personal.library.model.NotificationType.USER_APPROVED, user.getId());
+        auditLogService.logAction(AuditLogAction.APPROVE_USER, "Approved user ID: " + userId);
+        notificationService.createForUser(user, "Your account has been approved and activated.", NotificationType.USER_APPROVED, user.getId());
     }
 
     /**
@@ -86,7 +88,7 @@ public class UserManagementService {
 
         refreshTokenService.deleteByUserId(userId);
 
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.BAN_USER, "Banned user ID: " + userId);
+        auditLogService.logAction(AuditLogAction.BAN_USER, "Banned user ID: " + userId);
     }
 
     /**
@@ -107,7 +109,7 @@ public class UserManagementService {
 
         refreshTokenService.deleteByUserId(userId);
 
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.TIMEOUT_USER, "Timed out user ID: " + userId + " for " + minutes + " minutes");
+        auditLogService.logAction(AuditLogAction.TIMEOUT_USER, "Timed out user ID: " + userId + " for " + minutes + " minutes");
     }
 
     /**
@@ -152,7 +154,7 @@ public class UserManagementService {
         request.setResetToken(token);
         
         passwordResetRequestRepository.save(request);
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.APPROVE_PASSWORD_RESET, "Approved password reset for user ID: " + request.getUser().getId());
+        auditLogService.logAction(AuditLogAction.APPROVE_PASSWORD_RESET, "Approved password reset for user ID: " + request.getUser().getId());
         
         
         
@@ -177,7 +179,7 @@ public class UserManagementService {
 
         request.setStatus(PasswordResetRequest.ResetStatus.REJECTED);
         passwordResetRequestRepository.save(request);
-        auditLogService.logAction(org.personal.library.model.AuditLogAction.REJECT_PASSWORD_RESET, "Rejected password reset for user ID: " + request.getUser().getId());
+        auditLogService.logAction(AuditLogAction.REJECT_PASSWORD_RESET, "Rejected password reset for user ID: " + request.getUser().getId());
     }
 
     private UserResponseDTO mapToDTO(User user) {

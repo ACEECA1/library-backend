@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import org.personal.library.model.NotificationType;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +48,7 @@ public class NotificationService {
      * @return a NotificationResponseDTO representing the newly created notification
      */
     @Transactional
-    public NotificationResponseDTO createForUser(User user, String message, org.personal.library.model.NotificationType type, Long targetId) {
+    public NotificationResponseDTO createForUser(User user, String message, NotificationType type, Long targetId) {
         Notification notification = new Notification();
         notification.setMessage(message);
         notification.setUser(user);
@@ -65,7 +66,7 @@ public class NotificationService {
      * Creates or updates an aggregated notification. For example, grouping upvotes together.
      */
     @Transactional
-    public NotificationResponseDTO createOrUpdateAggregatedNotification(User user, org.personal.library.model.NotificationType type, Long targetId, String baseMessage, int count, String initiatorUsername) {
+    public NotificationResponseDTO createOrUpdateAggregatedNotification(User user, NotificationType type, Long targetId, String baseMessage, int count, String initiatorUsername) {
         java.util.Optional<Notification> opt = notificationRepository.findFirstByUserAndTypeAndTargetIdOrderByCreatedAtDesc(user, type, targetId);
         Notification notification;
         String message;
@@ -105,7 +106,7 @@ public class NotificationService {
     public void notifyAdmins(String message) {
         userRepository.findAll().stream()
                 .filter(user -> user.getRoles().stream().anyMatch(role -> "ADMIN".equals(role.getName())))
-                .forEach(admin -> createForUser(admin, message, org.personal.library.model.NotificationType.SYSTEM_MESSAGE, null));
+                .forEach(admin -> createForUser(admin, message, NotificationType.SYSTEM_MESSAGE, null));
     }
 
     /**
