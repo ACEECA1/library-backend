@@ -1,5 +1,0 @@
-$kind: collection
-description: Comprehensive Postman collection for the Library API with accurate DTO payloads.
-variables:
-  baseUrl: http://localhost:8080
-  token: ""
