@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import static org.springframework.security.core.userdetails.User.builder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +51,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         boolean isAccountLocked = user.getStatus() == User.UserStatus.BANNED 
                 || (user.getBannedUntil() != null && user.getBannedUntil().isAfter(LocalDateTime.now()));
 
-        return org.springframework.security.core.userdetails.User.builder()
+        return builder()
                 .username(user.getUsername())
                 .password(user.getPassword())
                 .disabled(user.getStatus() == User.UserStatus.PENDING)

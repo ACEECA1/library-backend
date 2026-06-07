@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
+import org.personal.library.dto.user.BanRequestDTO;
 import java.util.List;
 import org.personal.library.dto.auth.PasswordResetRequestResponseDTO;
 import org.personal.library.dto.user.TimeoutRequestDTO;
@@ -62,7 +63,7 @@ public class UserManagementController {
 
     @PostMapping("/{id}/ban")
     @PreAuthorize("hasAuthority('BAN_USER')")
-    public ResponseEntity<ApiResponse<Void>> banUser(@PathVariable Long id, @RequestBody org.personal.library.dto.user.BanRequestDTO request) {
+    public ResponseEntity<ApiResponse<Void>> banUser(@PathVariable Long id, @RequestBody BanRequestDTO request) {
         userManagementService.banUser(id, request.getReason());
         return ResponseEntity.ok(ApiResponse.success(null, "User banned successfully"));
     }

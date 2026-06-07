@@ -2,6 +2,8 @@ package org.personal.library.model;
 
 public enum AuditLogAction {
     UPLOAD_BOOK,
+    UPDATE_BOOK,
+    DELETE_BOOK,
     APPROVE_BOOK,
     ADD_COMMENT,
     PUBLISH_COMMENT,

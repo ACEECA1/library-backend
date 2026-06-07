@@ -12,6 +12,9 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordFie
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmbedded;
 import org.hibernate.search.engine.backend.types.Sortable;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -37,6 +40,11 @@ public class Book extends BaseEntity {
     @FullTextField(name = "content_fr", analyzer = "french")
     @FullTextField(name = "content_es", analyzer = "spanish")
     @FullTextField(name = "content_de", analyzer = "german")
+    @IndexingDependency(derivedFrom = {
+            @ObjectPath(
+                    @PropertyValue(propertyName = "id")
+            )
+    })
     private String content;
 
     @Column(nullable = false)

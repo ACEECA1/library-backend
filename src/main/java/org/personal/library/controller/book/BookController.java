@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.util.List;
 import org.personal.library.dto.book.BookResponseDTO;
+import org.personal.library.dto.book.BookUpdateRequestDTO;
 
 @RestController
 @RequestMapping("/api/books")
@@ -138,6 +139,19 @@ public class BookController {
 
 
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<BookResponseDTO>> updateBook(
+            @PathVariable Long id,
+            @RequestBody BookUpdateRequestDTO request) {
+        return ResponseEntity.ok(ApiResponse.success(bookService.updateBook(id, request)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteBook(@PathVariable Long id) {
+        bookService.deleteBook(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Book deleted successfully"));
+    }
+
     @GetMapping("/{id}/related")
     public ResponseEntity<ApiResponse<PaginatedResponse<BookResponseDTO>>> getRelatedBooks(
             @PathVariable Long id,
@@ -148,5 +162,11 @@ public class BookController {
     @GetMapping("/{id}/content")
     public ResponseEntity<ApiResponse<String>> getBookContent(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(bookService.getBookContent(id)));
+    }
+
+    @PostMapping("/reindex")
+    public ResponseEntity<ApiResponse<Void>> reindex() {
+        bookService.reindexAll();
+        return ResponseEntity.ok(ApiResponse.success(null, "Reindexing triggered"));
     }
 }

@@ -57,6 +57,10 @@ public class BookmarkService {
                 .bookId(saved.getBook().getId())
                 .bookTitle(saved.getBook().getTitle())
                 .bookThumbnailPath(saved.getBook().getThumbnailPath())
+                .bookAuthor(saved.getBook().getAuthor())
+                .bookAverageRating(saved.getBook().getAverageRating())
+                .bookUploaderUsername(saved.getBook().getUploader() != null ? saved.getBook().getUploader().getUsername() : null)
+                .bookViews(saved.getBook().getViews())
                 .note(saved.getNote())
                 .createdAt(saved.getCreatedAt())
                 .build();
@@ -80,6 +84,10 @@ public class BookmarkService {
                         .bookId(b.getBook().getId())
                         .bookTitle(b.getBook().getTitle())
                         .bookThumbnailPath(b.getBook().getThumbnailPath())
+                        .bookAuthor(b.getBook().getAuthor())
+                        .bookAverageRating(b.getBook().getAverageRating())
+                        .bookUploaderUsername(b.getBook().getUploader() != null ? b.getBook().getUploader().getUsername() : null)
+                        .bookViews(b.getBook().getViews())
                         .note(b.getNote())
                         .createdAt(b.getCreatedAt())
                         .build());

@@ -8,6 +8,9 @@ import org.personal.library.dao.BookRepository;
 import org.personal.library.dao.UserRepository;
 import org.personal.library.dto.common.PaginatedResponse;
 import org.personal.library.model.Book;
+import org.personal.library.model.Category;
+import org.personal.library.model.Series;
+import org.personal.library.model.Tag;
 import org.personal.library.model.User;
 import org.personal.library.service.audit.AuditLogService;
 import org.personal.library.service.badge.BadgeProducer;
@@ -21,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -34,6 +38,7 @@ import java.util.UUID;
 import org.personal.library.model.NotificationType;
 import org.personal.library.model.AuditLogAction;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -44,6 +49,7 @@ import org.personal.library.dao.SeriesRepository;
 import org.personal.library.dao.TagRepository;
 import org.personal.library.dao.BookmarkRepository;
 import org.personal.library.dto.book.BookResponseDTO;
+import org.personal.library.dto.book.BookUpdateRequestDTO;
 import org.personal.library.model.BookView;
 
 import org.hibernate.search.mapper.orm.Search;
@@ -471,6 +477,84 @@ public class BookService {
         return builder.build();
     }
 
+    @Transactional
+    public BookResponseDTO updateBook(Long id, BookUpdateRequestDTO request) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) {
+            throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
+
+        boolean hasApprovePerm = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("APPROVE_BOOK"));
+        boolean isUploader = book.getUploader() != null && book.getUploader().getId().equals(currentUser.getId());
+
+        if (!hasApprovePerm && !isUploader) {
+            throw new AppException("You do not have permission to modify this book", HttpStatus.FORBIDDEN);
+        }
+
+        if (request.getTitle() != null && !request.getTitle().isBlank()) {
+            book.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null) {
+            book.setDescription(request.getDescription());
+        }
+        if (request.getAuthor() != null) {
+            book.setAuthor(request.getAuthor());
+        }
+
+        if (request.getSeriesId() != null) {
+            Series series = seriesRepository.findById(request.getSeriesId())
+                    .orElseThrow(() -> new AppException("Series not found", HttpStatus.NOT_FOUND));
+            book.setSeries(series);
+        }
+
+        if (request.getCategoryIds() != null) {
+            Set<Category> categories = new HashSet<>(categoryRepository.findAllById(request.getCategoryIds()));
+            book.setCategories(categories);
+        }
+
+        if (request.getTagIds() != null) {
+            Set<Tag> tags = new HashSet<>(tagRepository.findAllById(request.getTagIds()));
+            book.setTags(tags);
+        }
+
+        bookRepository.save(book);
+        auditLogService.logAction(AuditLogAction.UPDATE_BOOK, "Updated book ID: " + book.getId());
+        return mapToDTO(book, currentUser);
+    }
+
+    @Transactional
+    public void deleteBook(Long id) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) {
+            throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
+
+        boolean hasApprovePerm = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("APPROVE_BOOK"));
+        boolean isUploader = book.getUploader() != null && book.getUploader().getId().equals(currentUser.getId());
+
+        if (!hasApprovePerm && !isUploader) {
+            throw new AppException("You do not have permission to delete this book", HttpStatus.FORBIDDEN);
+        }
+
+        cleanupFile(Paths.get(book.getPdfFilePath()));
+        if (book.getThumbnailPath() != null) {
+            cleanupFile(Paths.get(book.getThumbnailPath()));
+        }
+
+        bookRepository.delete(book);
+        auditLogService.logAction(AuditLogAction.DELETE_BOOK, "Deleted book ID: " + id);
+    }
+
     private String generateThumbnailFromPdf(Path pdfPath, Path thumbnailsPath) {
         try (PDDocument document = Loader.loadPDF(pdfPath.toFile())) {
             if (document.getNumberOfPages() == 0) {
@@ -499,6 +583,15 @@ public class BookService {
             Files.deleteIfExists(path);
         } catch (IOException ignored) {
             
+        }
+    }
+
+    @Transactional
+    public void reindexAll() {
+        try {
+            Search.session(entityManager).massIndexer().startAndWait();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 }
