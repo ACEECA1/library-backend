@@ -42,6 +42,7 @@ import org.personal.library.dao.BookViewRepository;
 import org.personal.library.dao.CategoryRepository;
 import org.personal.library.dao.SeriesRepository;
 import org.personal.library.dao.TagRepository;
+import org.personal.library.dao.BookmarkRepository;
 import org.personal.library.dto.book.BookResponseDTO;
 import org.personal.library.model.BookView;
 
@@ -60,6 +61,7 @@ public class BookService {
     private final TagRepository tagRepository;
     private final SeriesRepository seriesRepository;
     private final BookViewRepository bookViewRepository;
+    private final BookmarkRepository bookmarkRepository;
     private final AppProperties appProperties;
 
     /**
@@ -255,7 +257,7 @@ public class BookService {
     public BookResponseDTO getBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
-        return mapToDTO(book);
+        return mapToDTO(book, getCurrentUser());
     }
 
     /**
@@ -280,8 +282,9 @@ public class BookService {
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<BookResponseDTO> getAllLiveBooks(Pageable pageable) {
+        User currentUser = getCurrentUser();
         Page<Book> page = bookRepository.findByStatus(Book.BookStatus.LIVE, pageable);
-        return PaginatedResponse.from(page.map(this::mapToDTO));
+        return PaginatedResponse.from(page.map(book -> mapToDTO(book, currentUser)));
     }
 
     /**
@@ -296,8 +299,9 @@ public class BookService {
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<BookResponseDTO> searchBooks(String keyword, String category, String series, String sortBy, Pageable pageable) {
+        User currentUser = getCurrentUser();
         Page<BookResponseDTO> page = bookRepository.advancedSearch(keyword, category, series, sortBy, pageable)
-                .map(this::mapToDTO);
+                .map(book -> mapToDTO(book, currentUser));
         return PaginatedResponse.from(page);
     }
 
@@ -309,8 +313,9 @@ public class BookService {
      */
     @Transactional(readOnly = true)
     public PaginatedResponse<BookResponseDTO> getPendingBooks(Pageable pageable) {
+        User currentUser = getCurrentUser();
         Page<Book> page = bookRepository.findByStatus(Book.BookStatus.PENDING, pageable);
-        return PaginatedResponse.from(page.map(this::mapToDTO));
+        return PaginatedResponse.from(page.map(book -> mapToDTO(book, currentUser)));
     }
 
     @Transactional(readOnly = true)
@@ -323,7 +328,7 @@ public class BookService {
                 .orElseThrow(() -> new AppException("Uploader not found", HttpStatus.NOT_FOUND));
         
         Page<Book> page = bookRepository.findByUploader(uploader, pageable);
-        return PaginatedResponse.from(page.map(this::mapToDTO));
+        return PaginatedResponse.from(page.map(book -> mapToDTO(book, uploader)));
     }
 
     /**
@@ -402,14 +407,23 @@ public class BookService {
             return PaginatedResponse.from(Page.empty(pageable));
         }
 
+        User currentUser = getCurrentUser();
         Page<BookResponseDTO> page = bookRepository
                 .findByCategoriesInAndStatusAndIdNot(book.getCategories(), Book.BookStatus.LIVE, book.getId(), pageable)
-                .map(this::mapToDTO);
+                .map(b -> mapToDTO(b, currentUser));
         return PaginatedResponse.from(page);
     }
 
-    private BookResponseDTO mapToDTO(Book book) {
-        return BookResponseDTO.builder()
+    private User getCurrentUser() {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username != null && !username.equals("anonymousUser")) {
+            return userRepository.findByUsername(username).orElse(null);
+        }
+        return null;
+    }
+
+    private BookResponseDTO mapToDTO(Book book, User currentUser) {
+        BookResponseDTO.BookResponseDTOBuilder builder = BookResponseDTO.builder()
                 .id(book.getId())
                 .title(book.getTitle())
                 .author(book.getAuthor())
@@ -417,9 +431,19 @@ public class BookService {
                 .thumbnailPath(book.getThumbnailPath())
                 .status(book.getStatus())
                 .views(book.getViews())
+                .averageRating(book.getAverageRating())
+                .reviewCount(book.getReviewCount())
                 .uploaderUsername(book.getUploader() != null ? book.getUploader().getUsername() : null)
-                .createdAt(book.getCreatedAt())
-                .build();
+                .createdAt(book.getCreatedAt());
+
+        if (currentUser != null) {
+            bookmarkRepository.findByUserIdAndBookId(currentUser.getId(), book.getId())
+                    .ifPresent(bookmark -> {
+                        builder.isBookmarked(true);
+                        builder.userBookmarkId(bookmark.getId());
+                    });
+        }
+        return builder.build();
     }
 
     private String generateThumbnailFromPdf(Path pdfPath, Path thumbnailsPath) {

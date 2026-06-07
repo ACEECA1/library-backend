@@ -19,9 +19,9 @@ public class BookmarkController {
     private final BookmarkService bookmarkService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> createBookmark(@RequestBody BookmarkRequestDTO dto) {
-        bookmarkService.createBookmark(dto);
-        return ResponseEntity.ok(ApiResponse.success(null, "Bookmark created"));
+    public ResponseEntity<ApiResponse<BookmarkResponseDTO>> createBookmark(@RequestBody BookmarkRequestDTO dto) {
+        BookmarkResponseDTO created = bookmarkService.createBookmark(dto);
+        return ResponseEntity.ok(ApiResponse.success(created, "Bookmark created"));
     }
 
     @GetMapping

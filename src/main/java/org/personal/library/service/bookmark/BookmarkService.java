@@ -34,7 +34,7 @@ public class BookmarkService {
      * @throws AppException if the user is unauthorized, book not found, or bookmark already exists
      */
     @Transactional
-    public void createBookmark(BookmarkRequestDTO dto) {
+    public BookmarkResponseDTO createBookmark(BookmarkRequestDTO dto) {
         String username = SecurityUtils.getCurrentUsername();
         if (username == null) throw new AppException("Unauthorized", HttpStatus.UNAUTHORIZED);
 
@@ -50,7 +50,16 @@ public class BookmarkService {
         bookmark.setBook(book);
         bookmark.setNote(dto.getNote());
         
-        bookmarkRepository.save(bookmark);
+        Bookmark saved = bookmarkRepository.save(bookmark);
+        
+        return BookmarkResponseDTO.builder()
+                .id(saved.getId())
+                .bookId(saved.getBook().getId())
+                .bookTitle(saved.getBook().getTitle())
+                .bookThumbnailPath(saved.getBook().getThumbnailPath())
+                .note(saved.getNote())
+                .createdAt(saved.getCreatedAt())
+                .build();
     }
 
     /**
@@ -70,6 +79,7 @@ public class BookmarkService {
                         .id(b.getId())
                         .bookId(b.getBook().getId())
                         .bookTitle(b.getBook().getTitle())
+                        .bookThumbnailPath(b.getBook().getThumbnailPath())
                         .note(b.getNote())
                         .createdAt(b.getCreatedAt())
                         .build());

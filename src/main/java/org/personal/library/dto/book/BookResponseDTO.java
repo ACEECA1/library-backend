@@ -16,6 +16,10 @@ public class BookResponseDTO {
     private String thumbnailPath;
     private BookStatus status;
     private long views;
+    private double averageRating;
+    private int reviewCount;
+    private boolean isBookmarked;
+    private Long userBookmarkId;
     private String uploaderUsername;
     private LocalDateTime createdAt;
 }
