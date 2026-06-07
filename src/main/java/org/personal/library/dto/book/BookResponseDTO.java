@@ -18,7 +18,7 @@ public class BookResponseDTO {
     private long views;
     private double averageRating;
     private int reviewCount;
-    private boolean isBookmarked;
+    private boolean bookmarked;
     private Long userBookmarkId;
     private String uploaderUsername;
     private LocalDateTime createdAt;

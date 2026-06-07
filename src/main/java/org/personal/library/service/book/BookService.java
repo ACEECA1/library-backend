@@ -439,7 +439,7 @@ public class BookService {
         if (currentUser != null) {
             bookmarkRepository.findByUserIdAndBookId(currentUser.getId(), book.getId())
                     .ifPresent(bookmark -> {
-                        builder.isBookmarked(true);
+                        builder.bookmarked(true);
                         builder.userBookmarkId(bookmark.getId());
                     });
         }
