@@ -32,6 +32,7 @@ public class User extends BaseEntity {
     private UserStatus status = UserStatus.PENDING;
 
     private LocalDateTime bannedUntil;
+    private String banReason;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

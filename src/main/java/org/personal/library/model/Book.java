@@ -36,6 +36,9 @@ public class Book extends BaseEntity {
 
     @Transient
     @FullTextField(analyzer = "english")
+    @FullTextField(name = "content_fr", analyzer = "french")
+    @FullTextField(name = "content_es", analyzer = "spanish")
+    @FullTextField(name = "content_de", analyzer = "german")
     @IndexingDependency(
         derivedFrom = @ObjectPath(
             @PropertyValue(propertyName = "pdfFilePath")

@@ -62,15 +62,15 @@ public class UserManagementController {
 
     @PostMapping("/{id}/ban")
     @PreAuthorize("hasAuthority('BAN_USER')")
-    public ResponseEntity<ApiResponse<Void>> banUser(@PathVariable Long id) {
-        userManagementService.banUser(id);
+    public ResponseEntity<ApiResponse<Void>> banUser(@PathVariable Long id, @RequestBody org.personal.library.dto.user.BanRequestDTO request) {
+        userManagementService.banUser(id, request.getReason());
         return ResponseEntity.ok(ApiResponse.success(null, "User banned successfully"));
     }
 
     @PostMapping("/{id}/timeout")
     @PreAuthorize("hasAuthority('BAN_USER')")
     public ResponseEntity<ApiResponse<Void>> timeoutUser(@PathVariable Long id, @RequestBody TimeoutRequestDTO request) {
-        userManagementService.timeoutUser(id, request.getMinutes());
+        userManagementService.timeoutUser(id, request.getMinutes(), request.getReason());
         return ResponseEntity.ok(ApiResponse.success(null, "User timed out successfully"));
     }
 

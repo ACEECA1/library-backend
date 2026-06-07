@@ -121,16 +121,17 @@ public class UserManagementService {
      * @throws AppException if the user cannot be found
      */
     @Transactional
-    public void banUser(Long userId) {
+    public void banUser(Long userId, String reason) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
         user.setStatus(User.UserStatus.BANNED);
+        user.setBanReason(reason);
         userRepository.save(user);
 
         refreshTokenService.deleteByUserId(userId);
 
-        auditLogService.logAction(AuditLogAction.BAN_USER, "Banned user ID: " + userId);
+        auditLogService.logAction(AuditLogAction.BAN_USER, "Banned user ID: " + userId + ". Reason: " + reason);
     }
 
     /**
@@ -142,16 +143,17 @@ public class UserManagementService {
      * @throws AppException if the user cannot be found
      */
     @Transactional
-    public void timeoutUser(Long userId, int minutes) {
+    public void timeoutUser(Long userId, int minutes, String reason) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
         user.setBannedUntil(LocalDateTime.now().plusMinutes(minutes));
+        user.setBanReason(reason);
         userRepository.save(user);
 
         refreshTokenService.deleteByUserId(userId);
 
-        auditLogService.logAction(AuditLogAction.TIMEOUT_USER, "Timed out user ID: " + userId + " for " + minutes + " minutes");
+        auditLogService.logAction(AuditLogAction.TIMEOUT_USER, "Timed out user ID: " + userId + " for " + minutes + " minutes. Reason: " + reason);
     }
 
     /**
@@ -237,6 +239,8 @@ public class UserManagementService {
                         .flatMap(r -> r.getPermissions().stream())
                         .map(p -> p.getName().name())
                         .collect(Collectors.toSet()))
+                .bannedUntil(user.getBannedUntil())
+                .banReason(user.getBanReason())
                 .build();
     }
 }

@@ -7,4 +7,5 @@ import lombok.Data;
 public class TimeoutRequestDTO {
     @Positive(message = "Timeout duration must be positive")
     private int minutes;
+    private String reason;
 }

@@ -30,6 +30,6 @@ public class Report extends BaseEntity {
     private User user;
 
     public enum TargetType {
-        BOOK, COMMENT
+        BOOK, COMMENT, REVIEW, USER
     }
 }

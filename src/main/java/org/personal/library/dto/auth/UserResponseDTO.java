@@ -18,4 +18,6 @@ public class UserResponseDTO {
     private UserStatus status;
     private Set<String> roles;
     private Set<String> permissions;
+    private java.time.LocalDateTime bannedUntil;
+    private String banReason;
 }

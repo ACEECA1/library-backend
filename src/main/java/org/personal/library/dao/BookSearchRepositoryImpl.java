@@ -33,7 +33,7 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
         SearchResult<Book> result = searchSession.search(Book.class)
                 .where(f -> f.bool()
                         .must(f.match()
-                                .fields("title", "description", "content", "author")
+                                .fields("title", "description", "content", "content_fr", "content_es", "content_de", "author")
                                 .matching(keyword)
                                 .fuzzy())
                         .filter(f.match().field("status").matching(Book.BookStatus.LIVE))
@@ -55,7 +55,7 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
                     
                     if (keyword != null && !keyword.trim().isEmpty()) {
                         b.must(f.match()
-                                .fields("title", "description", "content", "author")
+                                .fields("title", "description", "content", "content_fr", "content_es", "content_de", "author")
                                 .matching(keyword)
                                 .fuzzy());
                     } else {
