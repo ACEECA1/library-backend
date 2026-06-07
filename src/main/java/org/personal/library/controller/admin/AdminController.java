@@ -33,7 +33,7 @@ public class AdminController {
     private final TagRepository tagRepository;
 
     @GetMapping("/audit-logs")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('VIEW_AUDIT_LOG')")
     public ResponseEntity<Page<AuditLogDTO>> getAuditLogs(Pageable pageable) {
         return ResponseEntity.ok(auditLogRepository.findAll(pageable).map(log -> {
             AuditLogDTO dto = new AuditLogDTO();
@@ -47,7 +47,7 @@ public class AdminController {
     }
 
     @PutMapping("/categories/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MANAGE_METADATA')")
     public ResponseEntity<ApiResponse<Void>> updateCategory(
             @PathVariable Long id,
             @RequestBody UpdateMetadataRequestDTO request) {
@@ -58,7 +58,7 @@ public class AdminController {
     }
 
     @PutMapping("/series/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MANAGE_METADATA')")
     public ResponseEntity<ApiResponse<Void>> updateSeries(
             @PathVariable Long id,
             @RequestBody UpdateMetadataRequestDTO request) {
@@ -70,7 +70,7 @@ public class AdminController {
     }
 
     @PutMapping("/tags/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('MANAGE_METADATA')")
     public ResponseEntity<ApiResponse<Void>> updateTag(
             @PathVariable Long id,
             @RequestBody UpdateMetadataRequestDTO request) {
