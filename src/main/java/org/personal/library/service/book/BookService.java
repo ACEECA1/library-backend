@@ -341,6 +341,19 @@ public class BookService {
         return PaginatedResponse.from(page.map(book -> mapToDTO(book, currentUser)));
     }
 
+    /**
+     * Retrieves a paginated list of books that are archived (deleted).
+     *
+     * @param pageable pagination and sorting details
+     * @return a paginated response containing a list of deleted books
+     */
+    @Transactional(readOnly = true)
+    public PaginatedResponse<BookResponseDTO> getArchivedBooks(Pageable pageable) {
+        User currentUser = getCurrentUser();
+        Page<Book> page = bookRepository.findByStatus(Book.BookStatus.DELETED, pageable);
+        return PaginatedResponse.from(page.map(book -> mapToDTO(book, currentUser)));
+    }
+
     @Transactional(readOnly = true)
     public PaginatedResponse<BookResponseDTO> getMyUploads(Pageable pageable) {
         String username = SecurityUtils.getCurrentUsername();
@@ -546,13 +559,10 @@ public class BookService {
             throw new AppException("You do not have permission to delete this book", HttpStatus.FORBIDDEN);
         }
 
-        cleanupFile(Paths.get(book.getPdfFilePath()));
-        if (book.getThumbnailPath() != null) {
-            cleanupFile(Paths.get(book.getThumbnailPath()));
-        }
-
-        bookRepository.delete(book);
-        auditLogService.logAction(AuditLogAction.DELETE_BOOK, "Deleted book ID: " + id);
+        book.setStatus(Book.BookStatus.DELETED);
+        bookRepository.save(book);
+        
+        auditLogService.logAction(AuditLogAction.DELETE_BOOK, "Archived book ID: " + id);
     }
 
     private String generateThumbnailFromPdf(Path pdfPath, Path thumbnailsPath) {

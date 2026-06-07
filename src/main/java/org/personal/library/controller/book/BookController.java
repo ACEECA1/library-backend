@@ -124,6 +124,13 @@ public class BookController {
         return ResponseEntity.ok(ApiResponse.success(bookService.getPendingBooks(pageable)));
     }
 
+    @GetMapping("/archived")
+    @PreAuthorize("hasAuthority('APPROVE_BOOK')")
+    public ResponseEntity<ApiResponse<PaginatedResponse<BookResponseDTO>>> getArchivedBooks(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(bookService.getArchivedBooks(pageable)));
+    }
+
     @GetMapping("/my-uploads")
     public ResponseEntity<ApiResponse<PaginatedResponse<BookResponseDTO>>> getMyUploads(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {

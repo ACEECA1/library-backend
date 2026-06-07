@@ -105,6 +105,6 @@ public class Book extends BaseEntity {
     private String author;
 
     public enum BookStatus {
-        PENDING, LIVE
+        PENDING, LIVE, DELETED
     }
 }
