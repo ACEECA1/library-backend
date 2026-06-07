@@ -5,6 +5,7 @@ public enum AuditLogAction {
     UPDATE_BOOK,
     DELETE_BOOK,
     APPROVE_BOOK,
+    RESTORE_BOOK,
     ADD_COMMENT,
     PUBLISH_COMMENT,
     SUBMIT_REPORT,

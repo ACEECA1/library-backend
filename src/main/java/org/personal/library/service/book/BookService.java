@@ -589,8 +589,6 @@ public class BookService {
         if (username == null) {
             throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
         }
-        User currentUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
         Book book = bookRepository.findById(id)
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
@@ -604,8 +602,7 @@ public class BookService {
         book.setStatus(Book.BookStatus.LIVE);
         bookRepository.save(book);
         
-        // Log custom audit action for restoring? Actually, we don't have RESTORE_BOOK in AuditLogAction.
-        // We'll just use a system message or skip audit log.
+        auditLogService.logAction(AuditLogAction.RESTORE_BOOK, "Restored book ID: " + book.getId());
     }
 
     private String generateThumbnailFromPdf(Path pdfPath, Path thumbnailsPath) {
