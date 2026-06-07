@@ -16,7 +16,7 @@ public class AuditLogService {
      * If the current user is authenticated, their username is attached to the log.
      * Otherwise, the action is logged under 'anonymousUser'.
      *
-     * @param action a brief string representing the action type (e.g., "UPLOAD_BOOK", "APPROVE_USER")
+     * @param action the {@link AuditLogAction} representing the action type
      * @param details a detailed description of the action and its context
      */
     public void logAction(AuditLogAction action, String details) {

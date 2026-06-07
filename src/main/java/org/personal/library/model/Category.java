@@ -24,6 +24,7 @@ public class Category extends BaseEntity {
     @KeywordField
     private String name;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToMany(mappedBy = "categories")
     private Set<Book> books = new HashSet<>();
 }

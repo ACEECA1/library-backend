@@ -27,6 +27,12 @@ public class BadgeConsumer {
     private final ReviewRepository reviewRepository;
     private final CommentRepository commentRepository;
 
+    /**
+     * Processes badge evaluation messages received from the RabbitMQ queue.
+     * Evaluates whether the user qualifies for new badges based on their upload, review, or upvote activity.
+     *
+     * @param message the badge message containing user ID and action type
+     */
     @RabbitListener(queues = RabbitMQConfig.BADGE_QUEUE)
     @Transactional
     public void processBadge(BadgeMessage message) {

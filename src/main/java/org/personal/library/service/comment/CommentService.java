@@ -103,6 +103,13 @@ public class CommentService {
         return PaginatedResponse.from(page);
     }
 
+    /**
+     * Retrieves a list of draft comments created by the authenticated user for a specific book.
+     *
+     * @param bookId the unique identifier of the book
+     * @return a list of draft comment DTOs belonging to the user for the given book
+     * @throws AppException if the user is not authenticated or not found
+     */
     @Transactional(readOnly = true)
     public List<CommentResponseDTO> getUserDraftsForBook(Long bookId) {
         String username = SecurityUtils.getCurrentUsername();

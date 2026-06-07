@@ -25,11 +25,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     /**
      * Loads a user from the database by their username to perform authentication and authorization.
-     * This method maps the user's roles and permissions to Spring Security GrantedAuthorities,
+     * This method maps the user's roles and permissions to Spring Security {@link GrantedAuthority}s,
      * and sets account status flags like 'disabled' (for pending users) or 'accountLocked' (for banned users).
      *
      * @param username the username of the user attempting to authenticate
-     * @return a UserDetails object containing the user's credentials, authorities, and account status
+     * @return a {@link UserDetails} object containing the user's credentials, authorities, and account status
      * @throws UsernameNotFoundException if no user with the given username exists in the database
      */
     @Override

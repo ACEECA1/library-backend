@@ -23,18 +23,38 @@ public class MetadataService {
     private final SeriesRepository seriesRepository;
     private final BookRepository bookRepository;
 
+    /**
+     * Retrieves all categories from the database.
+     *
+     * @return a list of all {@link Category} objects
+     */
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
 
+    /**
+     * Retrieves all tags from the database.
+     *
+     * @return a list of all {@link Tag} objects
+     */
     public List<Tag> getAllTags() {
         return tagRepository.findAll();
     }
 
+    /**
+     * Retrieves all series from the database.
+     *
+     * @return a list of all {@link Series} objects
+     */
     public List<Series> getAllSeries() {
         return seriesRepository.findAll();
     }
 
+    /**
+     * Creates a new category with the specified name and saves it to the database.
+     *
+     * @param name the name of the new category
+     */
     @Transactional
     public void createCategory(String name) {
         Category cat = new Category();
@@ -42,6 +62,11 @@ public class MetadataService {
         categoryRepository.save(cat);
     }
 
+    /**
+     * Creates a new tag with the specified name and saves it to the database.
+     *
+     * @param name the name of the new tag
+     */
     @Transactional
     public void createTag(String name) {
         Tag tag = new Tag();
@@ -49,6 +74,12 @@ public class MetadataService {
         tagRepository.save(tag);
     }
 
+    /**
+     * Creates a new series with the specified name and description and saves it to the database.
+     *
+     * @param name the name of the new series
+     * @param description the description of the new series
+     */
     @Transactional
     public void createSeries(String name, String description) {
         Series series = new Series();
@@ -57,6 +88,12 @@ public class MetadataService {
         seriesRepository.save(series);
     }
 
+    /**
+     * Deletes a category by its unique identifier. Also removes the category
+     * from any books that are associated with it before deletion.
+     *
+     * @param id the unique identifier of the category to delete
+     */
     @Transactional
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id).orElse(null);
@@ -72,6 +109,12 @@ public class MetadataService {
         }
     }
 
+    /**
+     * Deletes a tag by its unique identifier. Also removes the tag
+     * from any books that are associated with it before deletion.
+     *
+     * @param id the unique identifier of the tag to delete
+     */
     @Transactional
     public void deleteTag(Long id) {
         Tag tag = tagRepository.findById(id).orElse(null);

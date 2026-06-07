@@ -62,6 +62,21 @@ public class BookService {
     private final BookViewRepository bookViewRepository;
     private final AppProperties appProperties;
 
+    /**
+     * Uploads a new book, storing its PDF and optional thumbnail, and saving its metadata to the database.
+     * Submits the book for admin approval unless the uploader is an admin.
+     * Triggers asynchronous background tasks for virus scanning, text extraction, and thumbnail generation.
+     *
+     * @param title the title of the book
+     * @param description a description of the book
+     * @param pdfFile the PDF file of the book
+     * @param thumbnailFile an optional thumbnail image file
+     * @param categoryIds a list of category IDs to associate with the book
+     * @param tagIds a list of tag IDs to associate with the book
+     * @param author the author of the book
+     * @param seriesId an optional series ID to associate with the book
+     * @throws AppException if authentication fails, files cannot be stored, or validation fails
+     */
     @Transactional
     public void uploadBook(String title, String description, MultipartFile pdfFile, MultipartFile thumbnailFile,
                            List<Long> categoryIds, List<Long> tagIds, String author, Long seriesId) {
@@ -208,10 +223,34 @@ public class BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
         
-        
         return Paths.get(book.getPdfFilePath());
     }
 
+    /**
+     * Resolves the absolute path to the thumbnail image associated with a given book.
+     *
+     * @param bookId the unique identifier of the book
+     * @return the absolute Path to the book's thumbnail file on disk
+     * @throws AppException if the book or its thumbnail cannot be found
+     */
+    public Path getBookThumbnailPath(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
+        
+        if (book.getThumbnailPath() == null) {
+            throw new AppException("Thumbnail not found for this book", HttpStatus.NOT_FOUND);
+        }
+        
+        return Paths.get(book.getThumbnailPath());
+    }
+
+    /**
+     * Retrieves the details of a specific book by its ID.
+     *
+     * @param bookId the unique identifier of the book
+     * @return a data transfer object containing the book's details
+     * @throws AppException if the book is not found
+     */
     @Transactional(readOnly = true)
     public BookResponseDTO getBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
@@ -219,12 +258,42 @@ public class BookService {
         return mapToDTO(book);
     }
 
+    /**
+     * Retrieves the extracted text content of a specific book.
+     *
+     * @param bookId the unique identifier of the book
+     * @return the full text content of the book as a String
+     * @throws AppException if the book is not found
+     */
+    @Transactional(readOnly = true)
+    public String getBookContent(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
+        return book.getContent();
+    }
+
+    /**
+     * Retrieves a paginated list of all books that are currently live and visible.
+     *
+     * @param pageable pagination and sorting details
+     * @return a paginated response containing a list of live books
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<BookResponseDTO> getAllLiveBooks(Pageable pageable) {
         Page<Book> page = bookRepository.findByStatus(Book.BookStatus.LIVE, pageable);
         return PaginatedResponse.from(page.map(this::mapToDTO));
     }
 
+    /**
+     * Searches for books based on keyword, category, series, and sorting criteria.
+     *
+     * @param keyword the search term to look for in title or content
+     * @param category the category name to filter by
+     * @param series the series name to filter by
+     * @param sortBy the field to sort by
+     * @param pageable pagination details
+     * @return a paginated response of books matching the search criteria
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<BookResponseDTO> searchBooks(String keyword, String category, String series, String sortBy, Pageable pageable) {
         Page<BookResponseDTO> page = bookRepository.advancedSearch(keyword, category, series, sortBy, pageable)
@@ -232,9 +301,28 @@ public class BookService {
         return PaginatedResponse.from(page);
     }
 
+    /**
+     * Retrieves a paginated list of books that are pending admin approval.
+     *
+     * @param pageable pagination and sorting details
+     * @return a paginated response containing a list of pending books
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<BookResponseDTO> getPendingBooks(Pageable pageable) {
         Page<Book> page = bookRepository.findByStatus(Book.BookStatus.PENDING, pageable);
+        return PaginatedResponse.from(page.map(this::mapToDTO));
+    }
+
+    @Transactional(readOnly = true)
+    public PaginatedResponse<BookResponseDTO> getMyUploads(Pageable pageable) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) {
+            throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+        User uploader = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException("Uploader not found", HttpStatus.NOT_FOUND));
+        
+        Page<Book> page = bookRepository.findByUploader(uploader, pageable);
         return PaginatedResponse.from(page.map(this::mapToDTO));
     }
 
@@ -296,6 +384,15 @@ public class BookService {
         }
     }
 
+    /**
+     * Retrieves a paginated list of live books that share categories with the specified book.
+     * Excludes the specified book from the results.
+     *
+     * @param bookId the unique identifier of the reference book
+     * @param pageable pagination and sorting details
+     * @return a paginated response containing related books
+     * @throws AppException if the reference book is not found
+     */
     @Transactional(readOnly = true)
     public PaginatedResponse<BookResponseDTO> getRelatedBooks(Long bookId, Pageable pageable) {
         Book book = bookRepository.findById(bookId)

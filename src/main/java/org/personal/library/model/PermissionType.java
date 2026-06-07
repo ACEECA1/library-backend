@@ -7,6 +7,7 @@ public enum PermissionType {
     BAN_USER,
     APPROVE_USER,
     MANAGE_ROLE,
+    ASSIGN_ROLE,
     MANAGE_METADATA,
     VIEW_AUDIT_LOG
 }

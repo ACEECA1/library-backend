@@ -19,6 +19,13 @@ public class AuditConsumer {
     private final AuditLogRepository auditLogRepository;
     private final UserRepository userRepository;
 
+    /**
+     * Consumes an audit message from the RabbitMQ audit queue.
+     * Maps the received message to an {@link AuditLog} entity and saves it to the database.
+     * Associates the action with a user if the username provided in the message exists.
+     *
+     * @param message the {@link AuditMessage} containing the action, details, and username
+     */
     @RabbitListener(queues = RabbitMQConfig.AUDIT_QUEUE)
     @Transactional
     public void consumeAuditMessage(AuditMessage message) {

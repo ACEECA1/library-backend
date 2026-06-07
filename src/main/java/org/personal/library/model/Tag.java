@@ -21,6 +21,7 @@ public class Tag extends BaseEntity {
     @Column(unique = true, nullable = false)
     private String name;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @ManyToMany(mappedBy = "tags")
     private Set<Book> books = new HashSet<>();
 }

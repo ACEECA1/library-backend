@@ -23,6 +23,7 @@ public class Series extends BaseEntity {
     private String name;
     private String description;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @OneToMany(mappedBy = "series")
     private List<Book> books = new ArrayList<>();
 }

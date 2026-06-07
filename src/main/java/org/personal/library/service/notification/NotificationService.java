@@ -66,6 +66,14 @@ public class NotificationService {
 
     /**
      * Creates or updates an aggregated notification. For example, grouping upvotes together.
+     *
+     * @param user the recipient of the notification
+     * @param type the type of notification (e.g., UPVOTE, REPLY)
+     * @param targetId the ID of the related entity
+     * @param baseMessage the base message format
+     * @param count the number of occurrences to aggregate
+     * @param initiatorUsername the username of the latest initiator
+     * @return a NotificationResponseDTO representing the newly created or updated notification
      */
     @Transactional
     public NotificationResponseDTO createOrUpdateAggregatedNotification(User user, NotificationType type, Long targetId, String baseMessage, int count, String initiatorUsername) {
@@ -147,6 +155,8 @@ public class NotificationService {
     /**
      * Marks all unread notifications belonging to the current authenticated user as 'read'.
      * Useful for a "mark all as read" button in the UI.
+     *
+     * @throws AppException if the current user is not authenticated or not found
      */
     @Transactional
     public void markAllAsRead() {

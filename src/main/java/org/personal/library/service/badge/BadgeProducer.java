@@ -14,6 +14,13 @@ public class BadgeProducer {
 
     private final RabbitTemplate rabbitTemplate;
 
+    /**
+     * Publishes a badge evaluation event to the message broker.
+     * This event triggers background processing to check if the user has earned a new badge.
+     *
+     * @param actionType the type of action performed by the user (e.g., "UPLOAD", "REVIEW", "UPVOTE")
+     * @param userId the unique identifier of the user who performed the action
+     */
     public void publishEvent(String actionType, Long userId) {
         try {
             BadgeMessage message = new BadgeMessage(actionType, userId);

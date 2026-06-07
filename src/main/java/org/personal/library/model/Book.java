@@ -27,15 +27,15 @@ import java.util.Set;
 public class Book extends BaseEntity {
 
     @Column(nullable = false)
-    @FullTextField
+    @FullTextField(analyzer = "english")
     private String title;
 
     @Column(length = 2000)
-    @FullTextField
+    @FullTextField(analyzer = "english")
     private String description;
 
     @Transient
-    @FullTextField
+    @FullTextField(analyzer = "english")
     @IndexingDependency(
         derivedFrom = @ObjectPath(
             @PropertyValue(propertyName = "pdfFilePath")
@@ -96,7 +96,7 @@ public class Book extends BaseEntity {
     private Set<Tag> tags = new HashSet<>();
 
     @Column
-    @FullTextField
+    @FullTextField(analyzer = "english")
     private String author;
 
     public enum BookStatus {

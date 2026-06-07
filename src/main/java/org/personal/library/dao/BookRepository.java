@@ -17,6 +17,8 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookSearchRep
     @EntityGraph(attributePaths = {"uploader"})
     Page<Book> findByStatus(Book.BookStatus status, Pageable pageable);
     
+    Page<Book> findByUploader(org.personal.library.model.User uploader, Pageable pageable);
+
     Page<Book> findByCategoriesInAndStatusAndIdNot(Set<Category> categories, Book.BookStatus status, Long id, Pageable pageable);
 
     @Query("SELECT AVG(r.rating) FROM Review r WHERE r.book.id = :bookId")

@@ -22,6 +22,20 @@ public class UserManagementController {
 
     private final UserManagementService userManagementService;
 
+    @GetMapping
+    @PreAuthorize("hasAuthority('APPROVE_USER') or hasAuthority('ASSIGN_ROLE') or hasAuthority('BAN_USER')")
+    public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getAllUsers(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(userManagementService.getAllUsers(pageable)));
+    }
+
+    @PutMapping("/{id}/roles")
+    @PreAuthorize("hasAuthority('ASSIGN_ROLE')")
+    public ResponseEntity<ApiResponse<Void>> assignRoles(@PathVariable Long id, @RequestBody List<String> roleNames) {
+        userManagementService.assignRoles(id, roleNames);
+        return ResponseEntity.ok(ApiResponse.success(null, "Roles assigned successfully"));
+    }
+
     @GetMapping("/pending")
     @PreAuthorize("hasAuthority('APPROVE_USER')")
     public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getPendingUsers(

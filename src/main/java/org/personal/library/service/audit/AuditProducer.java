@@ -15,6 +15,14 @@ public class AuditProducer {
 
     private final RabbitTemplate rabbitTemplate;
 
+    /**
+     * Publishes an audit log message to the configured RabbitMQ exchange.
+     * The message is routed using the audit routing key and will be processed asynchronously.
+     *
+     * @param action the {@link AuditLogAction} indicating the type of action performed
+     * @param details a detailed description of the action and its context
+     * @param username the username of the user who performed the action, or 'anonymousUser'
+     */
     public void logAction(AuditLogAction action, String details, String username) {
         try {
             AuditMessage message = new AuditMessage(action, details, username);

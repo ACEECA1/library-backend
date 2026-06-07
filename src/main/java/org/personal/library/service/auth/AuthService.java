@@ -220,6 +220,32 @@ public class AuthService {
     }
 
     /**
+     * Updates the profile information of the currently authenticated user.
+     * Only fields that are explicitly provided (non-null) in the request will be modified.
+     *
+     * @param request the data transfer object containing the profile fields to update
+     * @return a {@link UserResponseDTO} containing the user's updated profile information
+     * @throws AppException if the user is not authenticated or cannot be found in the database
+     */
+    @Transactional
+    public UserResponseDTO updateProfile(UpdateProfileRequestDTO request) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) {
+            throw new AppException("Not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        if (request.getFirstName() != null) user.setFirstName(request.getFirstName());
+        if (request.getLastName() != null) user.setLastName(request.getLastName());
+        if (request.getDateOfBirth() != null) user.setDateOfBirth(request.getDateOfBirth());
+
+        userRepository.save(user);
+        return mapToDTO(user);
+    }
+
+    /**
      * Converts a User entity into a UserResponseDTO, flattening roles and permissions into collections.
      *
      * @param user the User entity to map

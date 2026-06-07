@@ -30,10 +30,42 @@ import org.personal.library.service.notification.NotificationService;
 public class UserManagementService {
 
     private final UserRepository userRepository;
+    private final org.personal.library.dao.RoleRepository roleRepository;
     private final PasswordResetRequestRepository passwordResetRequestRepository;
     private final AuditLogService auditLogService;
     private final RefreshTokenService refreshTokenService;
     private final NotificationService notificationService;
+
+    /**
+     * Retrieves a paginated list of all users in the system.
+     *
+     * @param pageable the pagination parameters specifying page size, number, and sorting
+     * @return a paginated response containing a list of all users as UserResponseDTOs
+     */
+    @Transactional(readOnly = true)
+    public PaginatedResponse<UserResponseDTO> getAllUsers(Pageable pageable) {
+        Page<UserResponseDTO> page = userRepository.findAll(pageable).map(this::mapToDTO);
+        return PaginatedResponse.from(page);
+    }
+
+    /**
+     * Assigns a specific set of roles to a user based on role names.
+     * Replaces any existing roles with the newly provided set of roles and logs the action in the audit log.
+     *
+     * @param userId the unique identifier of the user to receive the roles
+     * @param roleNames a list containing the names of the roles to be assigned
+     * @throws AppException if the user is not found by the provided ID
+     */
+    @Transactional
+    public void assignRoles(Long userId, java.util.List<String> roleNames) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+        
+        java.util.List<Role> roles = roleRepository.findByNameIn(roleNames);
+        user.setRoles(new java.util.HashSet<>(roles));
+        userRepository.save(user);
+        auditLogService.logAction(AuditLogAction.ASSIGN_ROLE, "Assigned roles to user ID: " + userId);
+    }
 
     /**
      * Retrieves a paginated list of users whose registrations are currently pending approval.

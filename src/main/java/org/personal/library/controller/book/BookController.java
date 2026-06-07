@@ -66,6 +66,34 @@ public class BookController {
         }
     }
 
+    @GetMapping("/{id}/thumbnail")
+    public ResponseEntity<Resource> getBookThumbnail(@PathVariable Long id) {
+        try {
+            Path thumbnailPath = bookService.getBookThumbnailPath(id);
+            Resource resource = new UrlResource(thumbnailPath.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                String filename = resource.getFilename();
+                MediaType mediaType = MediaType.IMAGE_JPEG;
+                if (filename != null) {
+                    if (filename.toLowerCase().endsWith(".png")) mediaType = MediaType.IMAGE_PNG;
+                    else if (filename.toLowerCase().endsWith(".gif")) mediaType = MediaType.IMAGE_GIF;
+                }
+                
+                return ResponseEntity.ok()
+                        .contentType(mediaType)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Error reading file", e);
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<BookResponseDTO>> getBook(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(bookService.getBook(id)));
@@ -94,6 +122,12 @@ public class BookController {
         return ResponseEntity.ok(ApiResponse.success(bookService.getPendingBooks(pageable)));
     }
 
+    @GetMapping("/my-uploads")
+    public ResponseEntity<ApiResponse<PaginatedResponse<BookResponseDTO>>> getMyUploads(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(bookService.getMyUploads(pageable)));
+    }
+
     @PostMapping("/{id}/approve")
     @PreAuthorize("hasAuthority('APPROVE_BOOK')")
     public ResponseEntity<ApiResponse<Void>> approveBook(@PathVariable Long id) {
@@ -108,5 +142,10 @@ public class BookController {
             @PathVariable Long id,
             @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         return ResponseEntity.ok(ApiResponse.success(bookService.getRelatedBooks(id, pageable)));
+    }
+
+    @GetMapping("/{id}/content")
+    public ResponseEntity<ApiResponse<String>> getBookContent(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(bookService.getBookContent(id)));
     }
 }
