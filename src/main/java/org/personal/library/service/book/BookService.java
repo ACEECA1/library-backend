@@ -193,9 +193,9 @@ public class BookService {
                     }
 
                     
-                    log.info("Saving book with extracted content to trigger Lucene index for Book ID: {}", book.getId());
+                    log.info("Saving book with extracted content to trigger Elasticsearch index for Book ID: {}", book.getId());
                     bookRepository.save(book);
-                    log.info("Background processing and Lucene indexing completed for Book ID: {}", book.getId());
+                    log.info("Background processing and Elasticsearch indexing completed for Book ID: {}", book.getId());
                 } catch (Exception e) {
                     log.error("Error during background processing for Book ID: {}", book.getId(), e);
                 }
