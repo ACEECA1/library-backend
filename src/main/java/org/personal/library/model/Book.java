@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
@@ -16,7 +17,11 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyVa
 
 import java.util.HashSet;
 import java.util.Set;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
+@Slf4j
 @Entity
 @Getter
 @Setter
@@ -49,12 +54,12 @@ public class Book extends BaseEntity {
             return null;
         }
         try {
-            java.nio.file.Path path = java.nio.file.Paths.get(extractedTextPath);
-            if (java.nio.file.Files.exists(path)) {
-                return java.nio.file.Files.readString(path);
+            Path path = Paths.get(extractedTextPath);
+            if (Files.exists(path)) {
+                return Files.readString(path);
             }
         } catch (Exception e) {
-            // Log or ignore
+            log.error("Failed to read extracted text from {}", extractedTextPath, e);
         }
         return null;
     }

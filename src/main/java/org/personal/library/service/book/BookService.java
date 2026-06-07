@@ -211,7 +211,7 @@ public class BookService {
                         try {
                             String textFileName = book.getId() + ".txt";
                             Path textFilePath = finalIndexesPath.resolve(textFileName);
-                            java.nio.file.Files.writeString(textFilePath, extractedContent);
+                            Files.writeString(textFilePath, extractedContent);
                             newTextPath = textFilePath.toString();
                             log.debug("Successfully saved extracted text to file for Book ID: {}", book.getId());
                         } catch (IOException e) {
