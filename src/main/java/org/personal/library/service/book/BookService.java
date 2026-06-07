@@ -443,6 +443,14 @@ public class BookService {
                         builder.userBookmarkId(bookmark.getId());
                     });
         }
+        
+        if (book.getCategories() != null) {
+            builder.categories(book.getCategories().stream().map(c -> c.getName()).toList());
+        }
+        if (book.getTags() != null) {
+            builder.tags(book.getTags().stream().map(t -> t.getName()).toList());
+        }
+        
         return builder.build();
     }
 
