@@ -84,7 +84,7 @@ public class CommentService {
                 notificationService.createForUser(book.getUploader(), "Someone commented on your book: " + book.getTitle(), NotificationType.BOOK_COMMENT, bookId);
             }
             if (comment.getParentComment() != null && !user.getId().equals(comment.getParentComment().getUser().getId())) {
-                notificationService.createForUser(comment.getParentComment().getUser(), user.getUsername() + " replied to your comment.", NotificationType.REPLY, comment.getParentComment().getId());
+                notificationService.createForUser(comment.getParentComment().getUser(), user.getUsername() + " replied to your comment.", NotificationType.REPLY, bookId);
             }
         }
     }
@@ -196,7 +196,7 @@ public class CommentService {
              notificationService.createOrUpdateAggregatedNotification(
                   comment.getUser(),
                   NotificationType.UPVOTE,
-                  comment.getId(),
+                  comment.getBook().getId(),
                   "upvoted your comment.",
                   comment.getUpvotes(),
                   user.getUsername()
@@ -247,7 +247,7 @@ public class CommentService {
             notificationService.createOrUpdateAggregatedNotification(
                     comment.getUser(),
                     NotificationType.DOWNVOTE,
-                    comment.getId(),
+                    comment.getBook().getId(),
                     "downvoted your comment.",
                     comment.getDownvotes(),
                     user.getUsername()

@@ -241,6 +241,7 @@ public class UserManagementService {
                         .collect(Collectors.toSet()))
                 .bannedUntil(user.getBannedUntil())
                 .banReason(user.getBanReason())
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 }

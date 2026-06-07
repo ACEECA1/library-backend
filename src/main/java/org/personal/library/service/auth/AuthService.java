@@ -264,6 +264,7 @@ public class AuthService {
                         .flatMap(r -> r.getPermissions().stream())
                         .map(p -> p.getName().name())
                         .collect(Collectors.toSet()))
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 }

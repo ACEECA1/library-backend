@@ -156,7 +156,14 @@ public class BookController {
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Book deleted successfully"));
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
+
+    @PostMapping("/{id}/restore")
+    @PreAuthorize("hasAuthority('APPROVE_BOOK')")
+    public ResponseEntity<ApiResponse<Void>> restoreBook(@PathVariable Long id) {
+        bookService.restoreBook(id);
+        return ResponseEntity.ok(ApiResponse.success(null));
     }
 
     @GetMapping("/{id}/related")

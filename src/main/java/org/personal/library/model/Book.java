@@ -35,17 +35,31 @@ public class Book extends BaseEntity {
     @FullTextField(analyzer = "english")
     private String description;
 
+    @Column
+    private String extractedTextPath;
+
     @Transient
     @FullTextField(analyzer = "english")
     @FullTextField(name = "content_fr", analyzer = "french")
     @FullTextField(name = "content_es", analyzer = "spanish")
     @FullTextField(name = "content_de", analyzer = "german")
     @IndexingDependency(derivedFrom = {
-            @ObjectPath(
-                    @PropertyValue(propertyName = "id")
-            )
+            @ObjectPath(@PropertyValue(propertyName = "extractedTextPath"))
     })
-    private String content;
+    public String getContent() {
+        if (extractedTextPath == null || extractedTextPath.isEmpty()) {
+            return null;
+        }
+        try {
+            java.nio.file.Path path = java.nio.file.Paths.get(extractedTextPath);
+            if (java.nio.file.Files.exists(path)) {
+                return java.nio.file.Files.readString(path);
+            }
+        } catch (Exception e) {
+            // Log or ignore
+        }
+        return null;
+    }
 
     @Column(nullable = false)
     private String pdfFilePath;
@@ -59,11 +73,9 @@ public class Book extends BaseEntity {
     private BookStatus status = BookStatus.PENDING;
 
     @Column(nullable = false)
-    @GenericField(sortable = Sortable.YES)
     private long views = 0;
 
     @Column(nullable = false)
-    @GenericField(sortable = Sortable.YES)
     private double averageRating = 0.0;
 
     @Column(nullable = false)

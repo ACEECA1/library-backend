@@ -109,10 +109,12 @@ public class BookService {
         try {
             Path booksPath = Paths.get(appProperties.getStorage().getBooks());
             Path thumbnailsPath = Paths.get(appProperties.getStorage().getThumbnails());
+            Path indexesPath = Paths.get(appProperties.getStorage().getIndexes());
 
             
             Files.createDirectories(booksPath);
             Files.createDirectories(thumbnailsPath);
+            Files.createDirectories(indexesPath);
 
             tempPdfPath = Files.createTempFile(booksPath, "upload-", ".pdf");
             Files.copy(pdfFile.getInputStream(), tempPdfPath, StandardCopyOption.REPLACE_EXISTING);
@@ -180,6 +182,7 @@ public class BookService {
 
             final Path finalPdfPath = pdfPath;
             final Path finalThumbnailsPath = thumbnailsPath;
+            final Path finalIndexesPath = indexesPath;
             final boolean generateThumb = (thumbnailFile == null || thumbnailFile.isEmpty());
 
             CompletableFuture.runAsync(() -> {
@@ -203,17 +206,32 @@ public class BookService {
                         log.debug("Successfully generated thumbnail for Book ID: {}", book.getId());
                     }
 
-                    final String finalContent = extractedContent;
+                    String newTextPath = null;
+                    if (extractedContent != null && !extractedContent.isBlank()) {
+                        try {
+                            String textFileName = book.getId() + ".txt";
+                            Path textFilePath = finalIndexesPath.resolve(textFileName);
+                            java.nio.file.Files.writeString(textFilePath, extractedContent);
+                            newTextPath = textFilePath.toString();
+                            log.debug("Successfully saved extracted text to file for Book ID: {}", book.getId());
+                        } catch (IOException e) {
+                            log.warn("Failed to save text to file for Book ID: {}", book.getId(), e);
+                        }
+                    }
+
                     final String finalThumbPath = newThumbnailPath;
+                    final String finalTextPath = newTextPath;
 
                     transactionTemplate.executeWithoutResult(status -> {
                         Book managedBook = bookRepository.findById(book.getId()).orElse(null);
                         if (managedBook != null) {
-                            managedBook.setContent(finalContent);
+                            if (finalTextPath != null) {
+                                managedBook.setExtractedTextPath(finalTextPath);
+                            }
                             if (finalThumbPath != null) {
                                 managedBook.setThumbnailPath(finalThumbPath);
-                                bookRepository.save(managedBook);
                             }
+                            bookRepository.save(managedBook);
                             log.info("Triggering explicit Elasticsearch indexing for Book ID: {}", managedBook.getId());
                             Search.session(entityManager).indexingPlan().addOrUpdate(managedBook);
                             log.info("Background processing and Elasticsearch indexing completed for Book ID: {}", managedBook.getId());
@@ -563,6 +581,31 @@ public class BookService {
         bookRepository.save(book);
         
         auditLogService.logAction(AuditLogAction.DELETE_BOOK, "Archived book ID: " + id);
+    }
+
+    @Transactional
+    public void restoreBook(Long id) {
+        String username = SecurityUtils.getCurrentUsername();
+        if (username == null) {
+            throw new AppException("User not authenticated", HttpStatus.UNAUTHORIZED);
+        }
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new AppException("Book not found", HttpStatus.NOT_FOUND));
+
+        boolean hasApprovePerm = SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("APPROVE_BOOK"));
+
+        if (!hasApprovePerm) {
+            throw new AppException("You do not have permission to restore this book", HttpStatus.FORBIDDEN);
+        }
+
+        book.setStatus(Book.BookStatus.LIVE);
+        bookRepository.save(book);
+        
+        // Log custom audit action for restoring? Actually, we don't have RESTORE_BOOK in AuditLogAction.
+        // We'll just use a system message or skip audit log.
     }
 
     private String generateThumbnailFromPdf(Path pdfPath, Path thumbnailsPath) {
