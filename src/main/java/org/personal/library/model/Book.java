@@ -5,9 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
+
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField;
@@ -34,16 +32,12 @@ public class Book extends BaseEntity {
     @FullTextField(analyzer = "english")
     private String description;
 
-    @Transient
+    @Lob
+    @Column(columnDefinition = "LONGTEXT")
     @FullTextField(analyzer = "english")
     @FullTextField(name = "content_fr", analyzer = "french")
     @FullTextField(name = "content_es", analyzer = "spanish")
     @FullTextField(name = "content_de", analyzer = "german")
-    @IndexingDependency(
-        derivedFrom = @ObjectPath(
-            @PropertyValue(propertyName = "pdfFilePath")
-        )
-    )
     private String content;
 
     @Column(nullable = false)
