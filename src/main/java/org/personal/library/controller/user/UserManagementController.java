@@ -25,8 +25,9 @@ public class UserManagementController {
     @GetMapping
     @PreAuthorize("hasAuthority('APPROVE_USER') or hasAuthority('ASSIGN_ROLE') or hasAuthority('BAN_USER')")
     public ResponseEntity<ApiResponse<PaginatedResponse<UserResponseDTO>>> getAllUsers(
+            @RequestParam(required = false) String search,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(userManagementService.getAllUsers(pageable)));
+        return ResponseEntity.ok(ApiResponse.success(userManagementService.getAllUsers(search, pageable)));
     }
 
     @PutMapping("/{id}/roles")

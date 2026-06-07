@@ -43,9 +43,14 @@ public class UserManagementService {
      * @return a paginated response containing a list of all users as UserResponseDTOs
      */
     @Transactional(readOnly = true)
-    public PaginatedResponse<UserResponseDTO> getAllUsers(Pageable pageable) {
-        Page<UserResponseDTO> page = userRepository.findAll(pageable).map(this::mapToDTO);
-        return PaginatedResponse.from(page);
+    public PaginatedResponse<UserResponseDTO> getAllUsers(String search, Pageable pageable) {
+        Page<User> page;
+        if (search != null && !search.isBlank()) {
+            page = userRepository.searchUsers(search, pageable);
+        } else {
+            page = userRepository.findAll(pageable);
+        }
+        return PaginatedResponse.from(page.map(this::mapToDTO));
     }
 
     /**
