@@ -44,7 +44,7 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
     }
 
     @Override
-    public Page<Book> advancedSearch(String keyword, String category, String series, String sortBy, Pageable pageable) {
+    public Page<Book> advancedSearch(String keyword, String category, String series, String tag, String sortBy, Pageable pageable) {
         SearchSession searchSession = Search.session(entityManager);
         int offset = (int) pageable.getOffset();
         int limit = pageable.getPageSize();
@@ -67,6 +67,9 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
                     }
                     if (series != null && !series.trim().isEmpty()) {
                         b.filter(f.match().field("series.name").matching(series));
+                    }
+                    if (tag != null && !tag.trim().isEmpty()) {
+                        b.filter(f.match().field("tags.name").matching(tag));
                     }
                 }))
                 .sort(f -> {

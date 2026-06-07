@@ -19,6 +19,7 @@ import java.util.Set;
 public class Tag extends BaseEntity {
 
     @Column(unique = true, nullable = false)
+    @org.hibernate.search.mapper.pojo.mapping.definition.annotation.KeywordField
     private String name;
 
     @com.fasterxml.jackson.annotation.JsonIgnore

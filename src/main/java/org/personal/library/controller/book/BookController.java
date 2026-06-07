@@ -110,9 +110,10 @@ public class BookController {
             @RequestParam(value = "q", required = false) String keyword,
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "series", required = false) String series,
+            @RequestParam(value = "tag", required = false) String tag,
             @RequestParam(value = "sortBy", required = false) String sortBy,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(bookService.searchBooks(keyword, category, series, sortBy, pageable)));
+        return ResponseEntity.ok(ApiResponse.success(bookService.searchBooks(keyword, category, series, tag, sortBy, pageable)));
     }
 
     @GetMapping("/pending")
