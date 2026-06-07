@@ -298,9 +298,9 @@ public class BookService {
      * @return a paginated response of books matching the search criteria
      */
     @Transactional(readOnly = true)
-    public PaginatedResponse<BookResponseDTO> searchBooks(String keyword, String category, String series, String sortBy, Pageable pageable) {
+    public PaginatedResponse<BookResponseDTO> searchBooks(String keyword, String category, String series, String tag, String sortBy, Pageable pageable) {
         User currentUser = getCurrentUser();
-        Page<BookResponseDTO> page = bookRepository.advancedSearch(keyword, category, series, sortBy, pageable)
+        Page<BookResponseDTO> page = bookRepository.advancedSearch(keyword, category, series, tag, sortBy, pageable)
                 .map(book -> mapToDTO(book, currentUser));
         return PaginatedResponse.from(page);
     }

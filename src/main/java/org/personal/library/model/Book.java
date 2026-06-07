@@ -93,6 +93,7 @@ public class Book extends BaseEntity {
             joinColumns = @JoinColumn(name = "book_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+    @IndexedEmbedded
     private Set<Tag> tags = new HashSet<>();
 
     @Column
