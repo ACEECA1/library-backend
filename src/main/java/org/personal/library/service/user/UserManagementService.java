@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.List;
+import java.util.HashSet;
 import org.personal.library.model.NotificationType;
 import org.personal.library.model.AuditLogAction;
 import java.time.LocalDateTime;
@@ -63,12 +65,12 @@ public class UserManagementService {
      * @throws AppException if the user is not found by the provided ID
      */
     @Transactional
-    public void assignRoles(Long userId, java.util.List<String> roleNames) {
+    public void assignRoles(Long userId, List<String> roleNames) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
         
-        java.util.List<Role> roles = roleRepository.findByNameIn(roleNames);
-        user.setRoles(new java.util.HashSet<>(roles));
+        List<Role> roles = roleRepository.findByNameIn(roleNames);
+        user.setRoles(new HashSet<>(roles));
         userRepository.save(user);
         auditLogService.logAction(AuditLogAction.ASSIGN_ROLE, "Assigned roles to user ID: " + userId);
     }

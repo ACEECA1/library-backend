@@ -5,6 +5,7 @@ import lombok.Data;
 import org.personal.library.model.Book.BookStatus;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -22,4 +23,6 @@ public class BookResponseDTO {
     private Long userBookmarkId;
     private String uploaderUsername;
     private LocalDateTime createdAt;
+    private List<String> categories;
+    private List<String> tags;
 }
