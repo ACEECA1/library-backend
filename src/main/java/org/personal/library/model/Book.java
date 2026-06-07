@@ -32,8 +32,7 @@ public class Book extends BaseEntity {
     @FullTextField(analyzer = "english")
     private String description;
 
-    @Lob
-    @Column(columnDefinition = "LONGTEXT")
+    @Transient
     @FullTextField(analyzer = "english")
     @FullTextField(name = "content_fr", analyzer = "french")
     @FullTextField(name = "content_es", analyzer = "spanish")

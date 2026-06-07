@@ -46,6 +46,10 @@ import org.personal.library.dao.BookmarkRepository;
 import org.personal.library.dto.book.BookResponseDTO;
 import org.personal.library.model.BookView;
 
+import org.hibernate.search.mapper.orm.Search;
+import jakarta.persistence.EntityManager;
+import org.springframework.transaction.support.TransactionTemplate;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -63,6 +67,8 @@ public class BookService {
     private final BookViewRepository bookViewRepository;
     private final BookmarkRepository bookmarkRepository;
     private final AppProperties appProperties;
+    private final TransactionTemplate transactionTemplate;
+    private final EntityManager entityManager;
 
     /**
      * Uploads a new book, storing its PDF and optional thumbnail, and saving its metadata to the database.
@@ -174,28 +180,39 @@ public class BookService {
                 log.info("Starting background processing (thumbnail and text extraction) for Book ID: {}", book.getId());
                 try {
                     
+                    String extractedContent = "";
                     try (PDDocument document = Loader.loadPDF(finalPdfPath.toFile())) {
                         PDFTextStripper stripper = new PDFTextStripper();
-                        String content = stripper.getText(document);
-                        book.setContent(content);
+                        extractedContent = stripper.getText(document);
                         log.debug("Successfully extracted text for Book ID: {}", book.getId());
                     } catch (IOException e) {
                         log.warn("Failed to extract text for Book ID: {}", book.getId(), e);
-                        book.setContent("");
                     }
                     
-                    
+                    String newThumbnailPath = null;
                     if (generateThumb) {
                         String generatedThumbnailFileName = generateThumbnailFromPdf(finalPdfPath, finalThumbnailsPath);
                         Path generatedThumbnailPath = finalThumbnailsPath.resolve(generatedThumbnailFileName);
-                        book.setThumbnailPath(generatedThumbnailPath.toString());
+                        newThumbnailPath = generatedThumbnailPath.toString();
                         log.debug("Successfully generated thumbnail for Book ID: {}", book.getId());
                     }
 
-                    
-                    log.info("Saving book with extracted content to trigger Elasticsearch index for Book ID: {}", book.getId());
-                    bookRepository.save(book);
-                    log.info("Background processing and Elasticsearch indexing completed for Book ID: {}", book.getId());
+                    final String finalContent = extractedContent;
+                    final String finalThumbPath = newThumbnailPath;
+
+                    transactionTemplate.executeWithoutResult(status -> {
+                        Book managedBook = bookRepository.findById(book.getId()).orElse(null);
+                        if (managedBook != null) {
+                            managedBook.setContent(finalContent);
+                            if (finalThumbPath != null) {
+                                managedBook.setThumbnailPath(finalThumbPath);
+                                bookRepository.save(managedBook);
+                            }
+                            log.info("Triggering explicit Elasticsearch indexing for Book ID: {}", managedBook.getId());
+                            Search.session(entityManager).indexingPlan().addOrUpdate(managedBook);
+                            log.info("Background processing and Elasticsearch indexing completed for Book ID: {}", managedBook.getId());
+                        }
+                    });
                 } catch (Exception e) {
                     log.error("Error during background processing for Book ID: {}", book.getId(), e);
                 }
