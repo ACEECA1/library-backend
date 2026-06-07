@@ -24,13 +24,14 @@ import org.personal.library.model.NotificationType;
 import org.personal.library.model.AuditLogAction;
 import java.time.LocalDateTime;
 import org.personal.library.service.notification.NotificationService;
+import org.personal.library.dao.RoleRepository;
 
 @Service
 @RequiredArgsConstructor
 public class UserManagementService {
 
     private final UserRepository userRepository;
-    private final org.personal.library.dao.RoleRepository roleRepository;
+    private final RoleRepository roleRepository;
     private final PasswordResetRequestRepository passwordResetRequestRepository;
     private final AuditLogService auditLogService;
     private final RefreshTokenService refreshTokenService;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Set;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.personal.library.model.User;
 
 @Repository
 public interface BookRepository extends JpaRepository<Book, Long>, BookSearchRepository {
@@ -17,7 +18,7 @@ public interface BookRepository extends JpaRepository<Book, Long>, BookSearchRep
     @EntityGraph(attributePaths = {"uploader"})
     Page<Book> findByStatus(Book.BookStatus status, Pageable pageable);
     
-    Page<Book> findByUploader(org.personal.library.model.User uploader, Pageable pageable);
+    Page<Book> findByUploader(User uploader, Pageable pageable);
 
     Page<Book> findByCategoriesInAndStatusAndIdNot(Set<Category> categories, Book.BookStatus status, Long id, Pageable pageable);
 
