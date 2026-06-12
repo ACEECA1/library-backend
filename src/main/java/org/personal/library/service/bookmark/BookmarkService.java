@@ -78,7 +78,7 @@ public class BookmarkService {
         String username = SecurityUtils.getCurrentUsername();
         User user = userRepository.findByUsername(username).orElseThrow();
 
-        Page<BookmarkResponseDTO> page = bookmarkRepository.findByUserId(user.getId(), pageable)
+        Page<BookmarkResponseDTO> page = bookmarkRepository.findByUserIdAndBookStatus(user.getId(), Book.BookStatus.LIVE, pageable)
                 .map(b -> BookmarkResponseDTO.builder()
                         .id(b.getId())
                         .bookId(b.getBook().getId())
