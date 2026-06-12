@@ -3,6 +3,7 @@ package org.personal.library.config;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import java.util.List;
 
 @Configuration
 @ConfigurationProperties(prefix = "app")
@@ -12,6 +13,20 @@ public class AppProperties {
     private Storage storage = new Storage();
     private VirusScan virusScan = new VirusScan();
     private Jwt jwt = new Jwt();
+    private Cors cors = new Cors();
+    private RateLimit rateLimit = new RateLimit();
+
+    @Data
+    public static class RateLimit {
+        private int capacity = 100;
+        private int tokens = 100;
+        private int minutes = 1;
+    }
+
+    @Data
+    public static class Cors {
+        private List<String> allowedOrigins;
+    }
 
     @Data
     public static class Jwt {

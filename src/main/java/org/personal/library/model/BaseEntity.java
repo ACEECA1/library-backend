@@ -11,6 +11,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.engine.backend.types.Sortable;
+
 @Getter
 @Setter
 @MappedSuperclass
@@ -21,6 +24,7 @@ public abstract class BaseEntity {
     private Long id;
 
     @CreationTimestamp
+    @GenericField(sortable = Sortable.YES)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp

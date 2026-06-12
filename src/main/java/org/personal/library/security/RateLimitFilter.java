@@ -1,5 +1,7 @@
 package org.personal.library.security;
 
+import org.personal.library.config.AppProperties;
+
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Refill;
@@ -20,10 +22,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();
+    private final AppProperties appProperties;
+
+    public RateLimitFilter(AppProperties appProperties) {
+        this.appProperties = appProperties;
+    }
 
     private Bucket createNewBucket() {
-        
-        Bandwidth limit = Bandwidth.classic(100, Refill.greedy(100, Duration.ofMinutes(1)));
+        AppProperties.RateLimit config = appProperties.getRateLimit();
+        Bandwidth limit = Bandwidth.classic(config.getCapacity(), Refill.greedy(config.getTokens(), Duration.ofMinutes(config.getMinutes())));
         return Bucket.builder().addLimit(limit).build();
     }
 

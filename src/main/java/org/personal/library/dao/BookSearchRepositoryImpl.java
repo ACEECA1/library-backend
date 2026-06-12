@@ -72,7 +72,16 @@ public class BookSearchRepositoryImpl implements BookSearchRepository {
                         b.filter(f.match().field("tags.name").matching(tag));
                     }
                 }))
-                .sort(f -> f.score())
+                .sort(f -> {
+                    if (sortBy != null && !sortBy.trim().isEmpty() && !sortBy.equalsIgnoreCase("relevance")) {
+                        String fieldName = sortBy;
+                        if (sortBy.equalsIgnoreCase("popular")) fieldName = "views";
+                        if (sortBy.equalsIgnoreCase("rating")) fieldName = "averageRating";
+                        if (sortBy.equalsIgnoreCase("recent")) fieldName = "createdAt";
+                        return f.field(fieldName).desc();
+                    }
+                    return f.score();
+                })
                 .fetch(offset, limit);
 
         return new PageImpl<>(result.hits(), pageable, result.total().hitCount());

@@ -14,6 +14,8 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexedEmb
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
+import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
+import org.hibernate.search.engine.backend.types.Sortable;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -76,9 +78,11 @@ public class Book extends BaseEntity {
     private BookStatus status = BookStatus.PENDING;
 
     @Column(nullable = false)
+    @GenericField(sortable = Sortable.YES)
     private long views = 0;
 
     @Column(nullable = false)
+    @GenericField(sortable = Sortable.YES)
     private double averageRating = 0.0;
 
     @Column(nullable = false)
